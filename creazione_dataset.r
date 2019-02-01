@@ -7,9 +7,10 @@ dirs_perc = list.dirs("../progetto_data_tech_&_machine_learning_dataset/Geolife 
 dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife Trajectories 1.3/Data")
 
 first_time = TRUE
-
+file.remove("dataset.csv")
 
 for (i_dirs in 1:length(dirs_perc)){
+  print(i_dirs)
   # guardo il numedo di file nella cartella se è 3 ho le label
   file = list.files(dirs_perc[i_dirs])
   if (length(file) == 3) {
@@ -54,10 +55,12 @@ for (i_dirs in 1:length(dirs_perc)){
         # aggiungo id dell'utente
         dati$Id_user <- dirs_name[i_dirs]
         if(first_time){
-          data_Trajectorys <- dati
+          #data_Trajectorys <- dati
+          write.table(dati,file="dataset.csv", append=TRUE,sep=",",row.names=FALSE) 
           first_time = FALSE
         }else{
-          data_Trajectorys <- rbind(data_Trajectorys, dati)
+          #data_Trajectorys <- rbind(data_Trajectorys, dati)
+          write.table(dati,file="dataset.csv", append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
         }
       }
     }
