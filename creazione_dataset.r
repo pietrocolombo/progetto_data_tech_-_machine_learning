@@ -9,22 +9,20 @@ dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife
 first_time = TRUE
 
 
-for (i in 1:length(dirs_perc)){
-  print(i)
+for (i_dirs in 1:length(dirs_perc)){
   # guardo il numedo di file nella cartella se è 3 ho le label
-  file = list.files(dirs_perc[i])
+  file = list.files(dirs_perc[i_dirs])
   if (length(file) == 3) {
     # leggo il file delle label
-    label <- read.table(paste(dirs_perc[i],"/labels.txt", sep = ""), quote = "\"", sep = "\t", header = TRUE )
+    label <- read.table(paste(dirs_perc[i_dirs],"/labels.txt", sep = ""), quote = "\"", sep = "\t", header = TRUE )
     # ottendo il percorso delle traiettorie
-    trajectory_perc <- paste(dirs_perc[i],"/Trajectory", sep = "")
+    trajectory_perc <- paste(dirs_perc[i_dirs],"/Trajectory", sep = "")
     file_trajectory <- list.files(trajectory_perc)
     index_file <- grep(".plt",file_trajectory)
     
     # uniformo le date per avere poterle confrontare
     label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS")
     label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS")
-    
     for (index in index_file){
       dati <- read.table(paste(trajectory_perc, "/", file_trajectory[index], sep = ''), header = FALSE, quote = "\"", skip = 6, sep = ",", colClasses = c("character", "character", "character", "character", "character", "character", "character") , numerals = "no.loss")
       # uniformo le date per avere poterle confrontare
@@ -35,9 +33,9 @@ for (i in 1:length(dirs_perc)){
       find_label <- grep(dati$Time[1], label$Start.Time.Posix)
       if (length(find_label) != 0){
         if(length(find_label) > 1){
-          print(paste("ho trovato più label per uno stesso percorso è strano", length(find_label), " nome del file ", file_trajectory[index], " directory name ", dirs_name[i], " indice for ", i))
+          print(paste("ho trovato più label per uno stesso percorso è strano", length(find_label), " nome del file ", file_trajectory[index], " directory name ", dirs_name[i_dirs], " indice for ", i_dirs))
         }
-        
+
         # se ho trovato una label che corrisponde al percorso
         
         # elimino le colonne che non mi servono
@@ -54,7 +52,7 @@ for (i in 1:length(dirs_perc)){
         # aggiungo nel data frame dati la colonna della label
         dati$Label <- label$Transportation.Mode[find_label[1]]
         # aggiungo id dell'utente
-        dati$Id_user <- dirs_name[i]
+        dati$Id_user <- dirs_name[i_dirs]
         if(first_time){
           data_Trajectorys <- dati
           first_time = FALSE
