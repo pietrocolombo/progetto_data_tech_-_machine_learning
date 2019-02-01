@@ -10,6 +10,7 @@ first_time = TRUE
 
 
 for (i in 1:length(dirs_perc)){
+  print(i)
   # guardo il numedo di file nella cartella se è 3 ho le label
   file = list.files(dirs_perc[i])
   if (length(file) == 3) {
@@ -18,15 +19,16 @@ for (i in 1:length(dirs_perc)){
     # ottendo il percorso delle traiettorie
     trajectory_perc <- paste(dirs_perc[i],"/Trajectory", sep = "")
     file_trajectory <- list.files(trajectory_perc)
-    index_file <- grep(".plt",file_trajectory) 
+    index_file <- grep(".plt",file_trajectory)
+    
+    # uniformo le date per avere poterle confrontare
+    label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS")
+    label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS")
     
     for (index in index_file){
       dati <- read.table(paste(trajectory_perc, "/", file_trajectory[index], sep = ''), header = FALSE, quote = "\"", skip = 6, sep = ",", colClasses = c("character", "character", "character", "character", "character", "character", "character") , numerals = "no.loss")
       # uniformo le date per avere poterle confrontare
       dati$Time <- as.POSIXct(paste(dati$V6, dati$V7, sep = " "),format="%Y-%m-%d %H:%M:%OS")
-      
-      label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS")
-      label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS")
       
       # verifico che abbiamo le label riferenti al file delle traiettorie
       # quindi guardo nella tabella delle label se ho una traiettoria con la label che parte con lo stesso timestamps
