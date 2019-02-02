@@ -13,7 +13,8 @@ for (i_dirs in 1:length(dirs_perc)){
   print(i_dirs)
   # guardo il numedo di file nella cartella se è 3 ho le label
   file = list.files(dirs_perc[i_dirs])
-  if (length(file) == 3) {
+  file <- file[file!="Icon\r"]
+  if (length(file) == 2) {
     # leggo il file delle label
     label <- read.table(paste(dirs_perc[i_dirs],"/labels.txt", sep = ""), quote = "\"", sep = "\t", header = TRUE )
     # ottendo il percorso delle traiettorie
