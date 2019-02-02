@@ -9,7 +9,7 @@ dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife
 first_time = TRUE
 file.remove("dataset.csv")
 
-for (i_dirs in 11:12){#length(dirs_perc)){
+for (i_dirs in 1:length(dirs_perc)){
   print(i_dirs)
   # guardo il numedo di file nella cartella se è 3 ho le label poichè il mac vede un file Icon\r
   file = list.files(dirs_perc[i_dirs])
