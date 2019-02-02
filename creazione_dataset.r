@@ -24,12 +24,12 @@ for (i_dirs in 1:length(dirs_perc)){
     index_file <- grep(".plt",file_trajectory)
     
     # uniformo le date per avere poterle confrontare
-    label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS")
-    label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS")
+    label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS", tz="GMT")
+    label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS", tz="GMT")
     for (index in index_file){
       dati <- read.table(paste(trajectory_perc, "/", file_trajectory[index], sep = ''), header = FALSE, quote = "\"", skip = 6, sep = ",", colClasses = c("character", "character", "character", "character", "character", "character", "character") , numerals = "no.loss")
       # uniformo le date per avere poterle confrontare
-      dati$Date_Time <- as.POSIXct(paste(dati$V6, dati$V7, sep = " "),format="%Y-%m-%d %H:%M:%OS")
+      dati$Date_Time <- as.POSIXct(paste(dati$V6, dati$V7, sep = " "),format="%Y-%m-%d %H:%M:%OS", tz="GMT")
       
       # elimino le colonne che non mi servono
       # che sono la collonna 3 e 5
@@ -69,7 +69,6 @@ for (i_dirs in 1:length(dirs_perc)){
           find_label_end <- grep(label$End.Time.Posix[i_row_label], dati$Date_Time)
           if(length(find_label_end) != 0)
           {
-            print("Matching")
             if(length(find_label) > 1){
               print(paste("ho trovato più label per uno stesso percorso è strano", length(find_label), " nome del file ", file_trajectory[index], " directory name ", dirs_name[i_dirs], " indice for ", i_dirs))
             }
