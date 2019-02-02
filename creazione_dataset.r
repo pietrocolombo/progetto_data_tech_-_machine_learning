@@ -9,7 +9,7 @@ dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife
 first_time = TRUE
 file.remove("dataset.csv")
 
-for (i_dirs in 1:length(dirs_perc)){
+for (i_dirs in 11:12){#length(dirs_perc)){
   print(i_dirs)
   # guardo il numedo di file nella cartella se è 3 ho le label poichè il mac vede un file Icon\r
   file = list.files(dirs_perc[i_dirs])
@@ -17,7 +17,7 @@ for (i_dirs in 1:length(dirs_perc)){
   # se ho due file vuol dire che ho anche le label
   if (length(file) == 2) {
     # leggo il file delle label
-    label <- read.table(paste(dirs_perc[i_dirs],"/labels.txt", sep = ""), quote = "\"", sep = "\t", header = TRUE )
+    label <- read.table(paste(dirs_perc[i_dirs],"/labels.txt", sep = ""), quote = "\"", sep = "\t", header = TRUE, colClasses = c("character", "character", "character") )
     # ottendo il percorso delle traiettorie
     trajectory_perc <- paste(dirs_perc[i_dirs],"/Trajectory", sep = "")
     file_trajectory <- list.files(trajectory_perc)
@@ -53,7 +53,7 @@ for (i_dirs in 1:length(dirs_perc)){
       dati$Id_perc <- file_trajectory[index]
       
       # aggiungo la colonna per la label
-      dati$Label <- NA
+      dati$Label <- ""
       
       # verifico che abbiamo le label riferenti al file delle traiettorie
       # quindi guardo nella tabella delle label se ho una traiettoria con la label che parte con lo stesso timestamps
