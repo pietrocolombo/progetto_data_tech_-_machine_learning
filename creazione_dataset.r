@@ -57,7 +57,7 @@ for (i_dirs in 1:length(dirs_perc)){
       
       # verifico che abbiamo le label riferenti al file delle traiettorie
       # quindi guardo nella tabella delle label se ho una traiettoria con la label che parte con lo stesso timestamps
-      
+      row_delete <- c()
       # siccome per ogni file plt ci possono essere più label
       # ciclo per ogni file su tutti gli elementi delle label
       for(i_row_label in 1:nrow(label))
@@ -90,8 +90,17 @@ for (i_dirs in 1:length(dirs_perc)){
               #data_Trajectorys <- rbind(data_Trajectorys, dati)
               write.table(dati2,file="dataset_completo.csv", append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
             }
+            # array per eliminare le righe che ho già trovato
+            row_delete <- c(row_delete, i_row_label)
+          }else
+          {
+            print("timestamp di inizio corrisponde ma non c'è quello di fine")
           }
         }
+      }
+      # elimino le righe che ho già trovato
+      if(length(row_delete) != 0){
+        label <- label[-c(row_delete),]
       }
     }
   }
