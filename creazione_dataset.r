@@ -7,7 +7,7 @@ dirs_perc = list.dirs("../progetto_data_tech_&_machine_learning_dataset/Geolife 
 dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife Trajectories 1.3/Data")
 
 first_time = TRUE
-file.remove("dataset.csv")
+file.remove("dataset_completo.csv")
 
 for (i_dirs in 1:length(dirs_perc)){
   print(i_dirs)
@@ -70,24 +70,25 @@ for (i_dirs in 1:length(dirs_perc)){
           if(length(find_label_end) != 0)
           {
             if(length(find_label) > 1){
-              print(paste("ho trovato più label per uno stesso percorso è strano", length(find_label), " nome del file ", file_trajectory[index], " directory name ", dirs_name[i_dirs], " indice for ", i_dirs))
+              # succede se ho più punti con lo stesso timestamp dipende dalla quantità dei dati
+              print(paste("ho trovato più label frequenza dei punti molto fitta", length(find_label), " nome del file ", file_trajectory[index], " directory name ", dirs_name[i_dirs], " indice for ", i_dirs))
             }
             # se ho trovato una label che corrisponde al percorso
             # metto la label solo per il tratto di percorso della label corrispondente
-            dati$Label[find_label[1] : find_label_end[1]] <- label$Transportation.Mode[i_row_label]
+            dati$Label[find_label[1] : tail(find_label_end, 1)] <- label$Transportation.Mode[i_row_label]
             
             # salvo in un nuovo dataframe il tratto del percorso corrisponedente
-            dati2 <- dati[find_label[1] : find_label_end[1],]
+            dati2 <- dati[find_label[1] : tail(find_label_end, 1),]
             
             # salvo i dati in un file csv
             if(first_time){
               #data_Trajectorys <- dati
-              write.table(dati2,file="dataset.csv", append=TRUE,sep=",",row.names=FALSE) 
+              write.table(dati2,file="dataset_completo.csv", append=TRUE,sep=",",row.names=FALSE) 
               first_time = FALSE
             }else{
               # rbind ci da problemi in velocità per la gestione della memoria che deve trovare uno spazio continuo
               #data_Trajectorys <- rbind(data_Trajectorys, dati)
-              write.table(dati2,file="dataset.csv", append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
+              write.table(dati2,file="dataset_completo.csv", append=TRUE,sep=",",col.names=FALSE,row.names=FALSE)
             }
           }
         }
