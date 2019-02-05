@@ -24,10 +24,10 @@ id_perc_current <- dati$Id_perc[1]
 label_current <- dati$Label[1]
 first_time <- TRUE
 
-distance <- c()
-vel <- c()
-delta_time <- c()
-angle <- c()
+dati$distance <- 0
+dati$vel <- 0
+dati$delta_time <- 0
+dati$angle <- 0
 
 for(i_row in 1:nrow(dati))
 {
@@ -40,21 +40,20 @@ for(i_row in 1:nrow(dati))
     if(first_time)
     {
       first_time <- FALSE
-      distance <- c(distance, 0)
-      vel <- c(vel, 0)
-      delta_time <- c(delta_time, 0)
-      angle <- c(angle, 0)
+      dati$distance[i_row] <- 0
+      dati$vel[i_row] <- 0
+      dati$delta_time[i_row] <- 0
+      dati$angle[i_row] <- 0
     }
     else
     {
       # ottendo la distanza in metri
-      distance <- c(distance, distGeo(c(dati$Longitude[i_row-1], dati$Latitude[i_row-1]), c(dati$Longitude[i_row], dati$Latitude[i_row])))
+      dati$distance[i_row] <- distGeo(c(dati$Longitude[i_row-1], dati$Latitude[i_row-1]), c(dati$Longitude[i_row], dati$Latitude[i_row]))
       # calcolo differenza di tempo
-      delta <- as.numeric(difftime(dati$Date_Time[i_row], dati$Date_Time[i_row-1], units = "secs"))
+      dati$delta_time[i_row] <- as.numeric(difftime(dati$Date_Time[i_row], dati$Date_Time[i_row-1], units = "secs"))
       # calcolo la velocità in m/s
-      vel <- c(vel, distance[i_row]/delta)
-      delta_time <- c(delta_time, delta)
-      
+      dati$vel[i_row] =  dati$distance[i_row]/dati$delta_time[i_row]
+
       # calcolo l'angolo tra il punto precedente e il corrente per capire come mi sto movendo
       bearing <- atan2(sin(deg2rad(dati$Longitude[i_row]) - deg2rad(dati$Longitude[i_row-1])) * cos(deg2rad(dati$Longitude[i_row])),
                        cos(deg2rad(dati$Longitude[i_row-1])) * sin(deg2rad(dati$Longitude[i_row])) - sin(deg2rad(dati$Longitude[i_row-1]))
@@ -65,7 +64,7 @@ for(i_row in 1:nrow(dati))
       {
         bearing = bearing - 2.0 * pi
       }
-      angle <- c(angle, bearing)
+      dati$angle[i_row] <- bearing
     }
   }
   else
@@ -74,17 +73,12 @@ for(i_row in 1:nrow(dati))
     id_perc_current <- dati$Id_perc[i_row]
     label_current <- dati$Label[i_row]
     
-    distance <- c(distance, 0)
-    vel <- c(vel, 0)
-    delta_time <- c(delta_time, 0)
-    angle <- c(angle, 0)
+    dati$distance[i_row] <- 0
+    dati$vel[i_row] <- 0
+    dati$delta_time[i_row] <- 0
+    dati$angle[i_row] <- 0
   }
 }
-
-dati$distance <- distance
-dati$vel <- vel
-dati$delta_time <- delta_time
-dati$angle <- angle
 
 write.csv(dati,file="dataset_with_add_features.csv" ,row.names=FALSE) 
 
