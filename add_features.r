@@ -86,5 +86,5 @@ dati$vel <- vel
 dati$delta_time <- delta_time
 dati$angle <- angle
 
-write.csv(dati,file="dataset_with_add_features.csv", append=TRUE,sep=",",row.names=FALSE) 
+write.csv(dati,file="dataset_with_add_features.csv" ,row.names=FALSE) 
 
