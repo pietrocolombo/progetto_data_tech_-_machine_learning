@@ -29,6 +29,10 @@ angle <- c()
 
 for(i_row in 1:nrow(dati))
 {
+  if(i_row %% 1000 == 0)
+  {
+    print(i_row)
+  }
   if(id_user_current == dati$Id_user[i_row] && id_perc_current == dati$Id_perc[i_row] && label_current == dati$Label[i_row])
   {
     if(first_time)
