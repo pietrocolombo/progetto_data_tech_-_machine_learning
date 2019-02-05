@@ -1,36 +1,42 @@
 
-if(!require(revgeo)){
-  install.packages("revgeo")
-  library("revgeo")
-}
+#if(!require(revgeo)){
+#  install.packages("revgeo")
+#  library("revgeo")
+#}
 if(!require(RCurl)){
   install.packages("RCurl")
   library("RCurl")
 }
+if(!require(jsonlite)){
+  install.packages("jsonlite")
+  library("jsonlite")
+}
+
 
 getfromosm <- function (longitude, latitude)
 {
+  geocode_data <- list()
+  geocode_frame <- data.frame()
+  
   url <- paste0("http://photon.komoot.de/reverse?lon=", 
                 longitude, "&lat=", latitude)
   # get infomation from osm
   data <- tryCatch(getURLAsynchronous(url), error = function(e) "Error")
   returned_data <- tryCatch(fromJSON(data), error = function(e) "There was an issue retrieving an address from Photon.  Please check that your coordinates are correct and try again.")
-  
-  housenumber <- tryCatch(returned_data$features[[1]]$properties$housenumber, 
+  housenumber <- tryCatch(returned_data$features[[3]]$housenumber, 
                           error = function(e) "House Number Not Found")
-  street <- tryCatch(returned_data$features[[1]]$properties$street, 
+  street <- tryCatch(returned_data$features[[3]]$street, 
                      error = function(e) "Street Not Found")
-  city <- tryCatch(returned_data$features[[1]]$properties$city, 
+  city <- tryCatch(returned_data$features[[3]]$city, 
                    error = function(e) "City Not Found")
-  zip <- tryCatch(returned_data$features[[1]]$properties$postcode, 
+  zip <- tryCatch(returned_data$features[[3]]$postcode, 
                   error = function(e) "Postcode Not Found")
-  state <- tryCatch(returned_data$features[[1]]$properties$state, 
+  state <- tryCatch(returned_data$features[[3]]$state, 
                     error = function(e) "State Not Found")
-  country <- tryCatch(returned_data$features[[1]]$properties$country, 
+  country <- tryCatch(returned_data$features[[3]]$country, 
                       error = function(e) "Country Not Found")
-  type_road <- tryCatch(returned_data$features[[1]]$properties$osm_key, 
+  type_road <- tryCatch(returned_data$features[[3]]$osm_key, 
                         error = function(e) "type_road Not Found")
-  
   if (is.null(housenumber)) {
     housenumber <- "House Number Not Found"
   }
@@ -66,10 +72,10 @@ getfromosm <- function (longitude, latitude)
   geocode_data[["country"]] <- c(geocode_data[["country"]], 
                                  country)
   geocode_data[["type_road"]] <- c(geocode_data[["type_road"]], 
-                                 country)
+                                   type_road)
   
   geocode_frame <- rbind(geocode_frame, as.data.frame(geocode_data))
-  
+  return(as.data.frame(geocode_data))
 }
 
 
@@ -77,10 +83,11 @@ perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_with_add_f
 
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
-state <- c()
-country <- c()
-city <- c()
-type_road <- c()
+
+dati$state <- ""
+dati$country <- ""
+dati$city <- ""
+dati$type_road <- ""
 
 for(i_row in 1:nrow(dati))
 {
@@ -92,13 +99,13 @@ for(i_row in 1:nrow(dati))
   city <- c(city, info$city)
   type_road <- c(type_road, info$type_road)
   
+  dati$state[i_row] <- state
+  dati$country[i_row] <- country
+  dati$city[i_row] <- city
+  dati$type_road[i_row] <- type_road
+  
   #revgeo(longitude = dati$Longitude[i_row], latitude = dati$Latitude[i_row], output='frame')
 }
-
-dati$state <- state
-dati$country <- country
-dati$city <- city
-dati$type_road <- type_road
 
 write.csv(dati,file="dataset_with_osm.csv" ,row.names=FALSE) 
 
