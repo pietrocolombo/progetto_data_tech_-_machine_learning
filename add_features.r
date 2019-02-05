@@ -1,4 +1,6 @@
 
+deg2rad <- function(deg) {(deg * pi) / (180)}
+
 if(!require(geosphere)){
   install.packages("geosphere")
 }
@@ -29,7 +31,7 @@ angle <- c()
 
 for(i_row in 1:nrow(dati))
 {
-  if(i_row %% 1000 == 0)
+  if(i_row %% 10000 == 0)
   {
     print(i_row)
   }
@@ -54,9 +56,10 @@ for(i_row in 1:nrow(dati))
       delta_time <- c(delta_time, delta)
       
       # calcolo l'angolo tra il punto precedente e il corrente per capire come mi sto movendo
-      bearing <- atan2(sin(dati$Longitude[i_row] - dati$Longitude[i_row-1]) * cos(dati$Longitude[i_row]),
-                       cos(dati$Longitude[i_row-1]) * sin(dati$Longitude[i_row]) - sin(dati$Longitude[i_row-1]) * cos(dati$Longitude[i_row])
-                       *cos(dati$Longitude[i_row] - dati$Longitude[i_row-1]))
+      bearing <- atan2(sin(deg2rad(dati$Longitude[i_row]) - deg2rad(dati$Longitude[i_row-1])) * cos(deg2rad(dati$Longitude[i_row])),
+                       cos(deg2rad(dati$Longitude[i_row-1])) * sin(deg2rad(dati$Longitude[i_row])) - sin(deg2rad(dati$Longitude[i_row-1]))
+                       * cos(deg2rad(dati$Longitude[i_row]))
+                       * cos(deg2rad(dati$Longitude[i_row]) - deg2rad(dati$Longitude[i_row-1])))
       bearing = bearing + 2.0 * pi
       while(bearing > 2.0 * pi)
       {
