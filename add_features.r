@@ -65,8 +65,10 @@ for(i_row in 1:nrow(dati))
     id_perc_current <- dati$Id_perc[i_row]
     label_current <- dati$Label[i_row]
     
-    fist_time <- TRUE
-    i_row <- i_row -1
+    distance <- c(distance, 0)
+    vel <- c(vel, 0)
+    delta_time <- c(delta_time, 0)
+    angle <- c(angle, 0)
   }
 }
 
