@@ -6,6 +6,8 @@ library("geosphere")
 
 perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_completo.csv"
 
+file.remove("dataset_with_add_features.csv")
+
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # cancelliamo righe le quali hanno latitudine >90 0 <-90 
