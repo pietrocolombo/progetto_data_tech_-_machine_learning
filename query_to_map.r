@@ -94,15 +94,10 @@ for(i_row in 1:nrow(dati))
   # compose url for query osm
   info <- getfromosm(longitude = dati$Longitude[i_row], latitude = dati$Latitude[i_row])
   
-  state <- c(state, info$state)
-  country <- c(country, info$country)
-  city <- c(city, info$city)
-  type_road <- c(type_road, info$type_road)
-  
-  dati$state[i_row] <- state
-  dati$country[i_row] <- country
-  dati$city[i_row] <- city
-  dati$type_road[i_row] <- type_road
+  dati$state[i_row] <- info$state
+  dati$country[i_row] <- info$country
+  dati$city[i_row] <- info$city
+  dati$type_road[i_row] <- info$type_road
   
   #revgeo(longitude = dati$Longitude[i_row], latitude = dati$Latitude[i_row], output='frame')
 }
