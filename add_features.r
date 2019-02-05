@@ -4,7 +4,7 @@ if(!require(geosphere)){
 }
 library("geosphere")
 
-perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_completo_senza_cancellazione_label_row.csv"
+perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_completo.csv"
 
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
@@ -12,8 +12,8 @@ dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 dati <- dati[dati$Latitude < 90,]
 dati <- dati[dati$Latitude > -90,]
 
-dati <- dati[dati$Longitude < 180]
-dati <- dati[dati$Longitude > -180]
+dati <- dati[dati$Longitude < 180,]
+dati <- dati[dati$Longitude > -180,]
 
 id_user_current <- dati$Id_user[1]
 id_perc_current <- dati$Id_perc[1]
@@ -48,9 +48,9 @@ for(i_row in 1:nrow(dati))
       delta_time <- c(delta_time, delta)
       
       # calcolo l'angolo tra il punto precedente e il corrente per capire come mi sto movendo
-      bearing <- atan2(sin(dati$Longitude[i] - dati$Longitude[i-1]) * cos(dati$Longitude[i]),
-                       cos(dati$Longitude[i-1]) * sin(dati$Longitude[i]) - sin(dati$Longitude[i-1]) * cos(dati$Longitude[i])
-                       *cos(dati$Longitude[i] - dati$Longitude[i-1]))
+      bearing <- atan2(sin(dati$Longitude[i_row] - dati$Longitude[i_row-1]) * cos(dati$Longitude[i_row]),
+                       cos(dati$Longitude[i_row-1]) * sin(dati$Longitude[i_row]) - sin(dati$Longitude[i_row-1]) * cos(dati$Longitude[i_row])
+                       *cos(dati$Longitude[i_row] - dati$Longitude[i_row-1]))
       bearing = bearing + 2.0 * pi
       while(bearing > 2.0 * pi)
       {
