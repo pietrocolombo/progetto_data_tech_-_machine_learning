@@ -81,6 +81,8 @@ getfromosm <- function (longitude, latitude)
 
 perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_with_add_features.csv"
 
+file.remove("dataset_with_osm.csv")
+
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 
