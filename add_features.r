@@ -41,10 +41,6 @@ for(i_row in 1:nrow(dati))
 {
   if(cond[i_row])
   {
-    if(i_row %% 10000 == 0)
-    {
-      print(i_row)
-    }
     
     distance[i_row] <- distGeo(c(longitudine[i_row-1], latitudine[i_row-1]), c(longitudine[i_row], latitudine[i_row]))
     delta_time[i_row] <- as.numeric(difftime(date_time[i_row], date_time[i_row-1], units = "secs"))
