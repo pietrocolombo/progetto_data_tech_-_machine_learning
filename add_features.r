@@ -22,6 +22,11 @@ dati <- dati[dati$Longitude > -180,]
 
 
 cond <- c(FALSE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
+
+longitudine <- dati$Longitude
+latitudine <- dati$Latitude
+date_time <- dati$Date_Time
+
 dati$distance <- 0
 dati$vel <- 0
 dati$delta_time <- 0
@@ -40,18 +45,14 @@ for(i_row in 1:nrow(dati))
     {
       print(i_row)
     }
-    longitudinePrec <- dati$Longitude[i_row-1]
-    latitudinePrec <- dati$Latitude[i_row-1]
-    longitudine <- dati$Longitude[i_row]
-    latitudine <- dati$Latitude[i_row]
     
-    distance[i_row] <- distGeo(c(longitudinePrec, latitudinePrec), c(longitudine, latitudine))
-    delta_time[i_row] <- as.numeric(difftime(dati$Date_Time[i_row], dati$Date_Time[i_row-1], units = "secs"))
+    distance[i_row] <- distGeo(c(longitudine[i_row-1], latitudine[i_row-1]), c(longitudine[i_row], latitudine[i_row]))
+    delta_time[i_row] <- as.numeric(difftime(date_time[i_row], date_time[i_row-1], units = "secs"))
     vel[i_row] <- distance[i_row]/delta_time[i_row]
-    bearing <- atan2(sin(deg2rad(longitudine) - deg2rad(longitudinePrec)) * cos(deg2rad(latitudine)),
-                     cos(deg2rad(latitudinePrec)) * sin(deg2rad(latitudine)) - sin(deg2rad(latitudinePrec))
-                     * cos(deg2rad(latitudine))
-                     * cos(deg2rad(longitudine) - deg2rad(longitudinePrec)))
+    bearing <- atan2(sin(deg2rad(longitudine[i_row]) - deg2rad(longitudine[i_row-1])) * cos(deg2rad(latitudine[i_row])),
+                     cos(deg2rad(latitudine[i_row-1])) * sin(deg2rad(latitudine[i_row])) - sin(deg2rad(latitudine[i_row-1]))
+                     * cos(deg2rad(latitudine[i_row]))
+                     * cos(deg2rad(longitudine[i_row]) - deg2rad(longitudine[i_row-1])))
     bearing = bearing + 2.0 * pi
     while(bearing > 2.0 * pi)
     {
