@@ -9,7 +9,7 @@ dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 file.remove("dataset_with_osm.csv")
 
-info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='frame')
+info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='hash')
 
 dati$state <- as.character(info$state)
 dati$country <- as.character(info$country)
