@@ -1,13 +1,18 @@
 
-if(!require(revgeo)){
-  install.packages("revgeo")
-  library("revgeo")
-}
+#if(!require(revgeo)){
+#  install.packages("revgeo")
+#  library("revgeo")
+#}
 
 perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 file.remove("dataset_with_osm_city.csv")
+
+# soglie per calcolo features
+delta_angolo <- 0.8
+vel_tr <- 0.3
+vr_soglia <- 0.2
 
 # TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
 cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
@@ -20,14 +25,7 @@ cond_vel_0 <- dati$vel > 0
 
 cond_alt_777 <- dati$Altitude == -777
 
-cond_vr <- abs(dati$vel[- 1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)] > vr_soglia
-
-
-
-# soglie per calcolo features
-delta_angolo <- 0.8
-vel_tr <- 0.3
-vr_soglia <- 0.2
+cond_vr <- (abs(dati$vel[- 1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)]) > vr_soglia
 
 # inizializzazione variabili temporanee per ogni traiettoria
 distanceTotal_i <- 0
