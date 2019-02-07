@@ -17,6 +17,8 @@ vr_soglia <- 0.2
 # TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
 cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
 
+dim_array <- table(cond)["FALSE"]
+
 cond_delta_angolo <- abs(dati$angle[-nrow(dati)] - dati$angle[-1]) > delta_angolo
 
 cond_vel <- dati$vel < vel_tr
@@ -25,7 +27,7 @@ cond_vel_0 <- dati$vel > 0
 
 cond_alt_777 <- dati$Altitude == -777
 
-cond_vr <- (abs(dati$vel[- 1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)]) > vr_soglia
+cond_vr <- (abs(dati$vel[-1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)]) > vr_soglia
 
 # inizializzazione variabili temporanee per ogni traiettoria
 distanceTotal_i <- 0
@@ -40,31 +42,35 @@ n_777 <- 0
 n_points <- 0
 
 # inizializzazione vettori delle features
-distanceTotal <- c()
-time_total <- c()
-vel_max <- c()
+distanceTotal <- vector(mode="double", length=dim_array)
+time_total <- vector(mode="double", length=dim_array)
+vel_max <- vector(mode="double", length=dim_array)
 # inizializzazione vettore delle label 
-label <- c()
+label <- vector(mode="character", length=dim_array)
 # inizializzazione vettore altitudine media del percorso
-altitudeMean <- c()
+altitudeMean <- vector(mode="double", length=dim_array)
 # inizializzazione vettore latitudine del punto di partenza
-latitudeStart <- c(dati$Latitude[1])
+latitudeStart <- vector(mode="double", length=dim_array)
+latitudeStart[1] <- dati$Latitude[1]
 # inizializzazione vettore latitudine del punto di arrivo
-latitudeEnd <- c()
+latitudeEnd <- vector(mode="double", length=dim_array)
 # inizializzazione vettore longitudine del punto di partenza
-longitudeStart <- c(dati$Longitude[1])
+longitudeStart <- vector(mode="double", length=dim_array)
+longitudeStart[1] <- dati$Longitude[1]
 # inizializzazione vettore longitudine del punto di arrivo
-longitudeEnd <- c()
+longitudeEnd <- vector(mode="double", length=dim_array)
 # Heading change rate
-hcr <- c()
+hcr <- vector(mode="double", length=dim_array)
 # stop rate
-sr <- c()
+sr <- vector(mode="double", length=dim_array)
 # velocity change rate
-vcr <- c()
+vcr <- vector(mode="double", length=dim_array)
 # numero punti con altezza a -777 di un percorso 
-n777 <- c()
+n777 <- vector(mode="double", length=dim_array)
 # n punti di un percorso
-npoints <- c()
+npoints <- vector(mode="double", length=dim_array)
+
+i <- 2
 
 for(i_row in 2:nrow(dati))
 {
@@ -101,28 +107,28 @@ for(i_row in 2:nrow(dati))
     }
     else
     {
-      altitudeSum <- altitudeSum + dati$Altitude
+      altitudeSum <- altitudeSum + dati$Altitude[i_row]
     }
     n_points <- n_points + 1
   }
   else
   {
-    distanceTotal <- c(distanceTotal, distanceTotal_i)
-    time_total <- c(time_total, timeTotal_i)
-    vel_max <- c(vel_max, vel_max_i)
-    hcr <- c(hcr, (n_hcr/distanceTotal))
-    sr <- c(sr, (n_sr/distanceTotal))
-    vcr <- c(vcr, n_vr/distanceTotal)
-    npoints <- c(npoints, n_points)
-    n777 <- c(n777, n_777)
-    altitudeMean <- c(altitudeMean, altitudeSum/(n_points-n_777))
-    longitudeStart <- c(longitudeStart, dati$Longitude[i_row])
-    latitudeStart <- c(latitudeStart, dati$Latitude[i_row])
+    distanceTotal[i] <- distanceTotal_i
+    time_total[i] <- timeTotal_i
+    vel_max[i] <- vel_max_i
+    hcr[i] <- n_hcr/distanceTotal
+    sr[i] <- n_sr/distanceTotal
+    vcr[i] <- n_vr/distanceTotal
+    npoints[i] <- n_points
+    n777[i] <- n_777
+    altitudeMean[i] <- altitudeSum/(n_points-n_777)
+    longitudeStart[i] <- dati$Longitude[i_row]
+    latitudeStart[i] <- dati$Latitude[i_row]
     
-    latitudeEnd <- c(latitudeEnd, dati$Latitude[i_row-1])
-    longitudeEnd <- c(longitudeEnd, dati$Longitude[i_row-1])
+    latitudeEnd[i-1] <- dati$Latitude[i_row-1]
+    longitudeEnd[i-1] <- dati$Longitude[i_row-1]
     
-    label <- dati$Label[i_row-1]
+    label[i] <- dati$Label[i_row-1]
     
     distanceTotal_i <- 0
     vel_max_i <- 0
@@ -135,9 +141,14 @@ for(i_row in 2:nrow(dati))
     n_points <- 0
     altitudeSum <- 0
     
+    i <- i+1
   }
   
 }
+
+latitudeEnd[i] <- dati$Latitude[nrow(dati)]
+longitudeEnd[i] <- dati$Longitude[nrow(dati)]
+
 dati_fin <- data.frame(
   longitudeStart = longitudeStart,
   latitudeStart = latitudeStart,
