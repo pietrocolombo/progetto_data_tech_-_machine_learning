@@ -1,12 +1,13 @@
 #script for download osm map
 
+library(RCurl)
 
-perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/cordinate.csv"
+perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_completo.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 perc <- "./progetto_data_tech_&_machine_learning_dataset/osm/"
 
-for(i_row in 1:nrow(dati))
+for(i_row in 2486:nrow(dati))
 {
   if(i_row %% 10000 == 0)
   {
