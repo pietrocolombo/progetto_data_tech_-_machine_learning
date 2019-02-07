@@ -7,12 +7,144 @@ if(!require(revgeo)){
 perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
-file.remove("dataset_with_osm.csv")
+file.remove("dataset_with_osm_city.csv")
 
-info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='hash')
+# TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
+cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
 
-dati$state <- as.character(info$state)
-dati$country <- as.character(info$country)
-dati$city <- as.character(info$city)
 
-write.csv(dati,file="dataset_with_osm_city.csv" ,row.names=FALSE) 
+# soglie per calcolo features
+delta_angolo <- 0.8
+vel_tr <- 0.3
+vr_soglia <- 0.2
+
+# inizializzazione variabili temporanee per ogni traiettoria
+distanceTotal_i <- 0
+vel_max_i <- 0
+timeTotal_i <- 0
+n_hcr <- 0
+n_sr <- 0
+n_vr <- 0
+vr <- 0
+altitudeSum <- 0
+n_777 <- 0
+n_points <- 0
+
+# inizializzazione vettori delle features
+distanceTotal <- c()
+time_total <- c()
+vel_max <- c()
+# inizializzazione vettore delle label 
+label <- c()
+# inizializzazione vettore altitudine media del percorso
+altitudeMean <- c()
+# inizializzazione vettore latitudine del punto di partenza
+latitudeStart <- c(dati$Latitude[1])
+# inizializzazione vettore latitudine del punto di arrivo
+latitudeEnd <- c()
+# inizializzazione vettore longitudine del punto di partenza
+longitudeStart <- c(dati$Longitude[1])
+# inizializzazione vettore longitudine del punto di arrivo
+longitudeEnd <- c()
+# Heading change rate
+hcr <- c()
+# stop rate
+sr <- c()
+# velocity change rate
+vcr <- c()
+# numero punti con altezza a -777 di un percorso 
+n777 <- c()
+# n punti di un percorso
+npoints <- c()
+
+for(i_row in 2:nrow(dati))
+{
+  if(cond[i_row])
+  {
+    distanceTotal_i <- distanceTotal_i + dati$distance[i_row]
+    timeTotal_i <- timeTotal_i + dati$delta_time[i_row]
+    if(dati$vel[i_row] > vel_max_i){
+      vel_max_i <- dati$vel[i_row]
+    }
+    if(abs(dati$angle[i_row-1] - dati$angle[i_row]) > delta_angolo)
+    {
+      n_hcr <- n_hcr + 1
+    }
+    if(dati$vel[i_row] < vel_tr)
+    {
+      n_sr <- n_sr + 1
+    }
+    if(dati$vel[i_row] > 0)
+    {
+      vr <- abs(dati$vel[i_row - 1] - dati$vel[i_row]) / dati$vel[i_row]
+      if(vr > vr_soglia)
+      {
+        n_vr <- n_vr + 1
+      }
+    }
+    if(dati$Altitude[i_row] == -777)
+    {
+      n_777 <- n_777 + 1
+    }
+    else
+    {
+      altitudeSum <- altitudeSum + dati$Altitude
+    }
+    n_points <- n_points + 1
+  }
+  else
+  {
+    distanceTotal <- c(distanceTotal, distanceTotal_i)
+    time_total <- c(timetotal, timeTotal_i)
+    vel_max <- c(vel_max, vel_max_i)
+    hcr <- c(hcr, (n_hcr/distanceTotal))
+    sr <- c(sr, (n_sr/distanceTotal))
+    vcr <- c(vcr, n_vr/distanceTotal)
+    npoints <- c(npoints, n_points)
+    n777 <- c(n777, n_777)
+    altitudeMean <- c(altitudeMean, altitudeSum/(n_points-n_777))
+    longitudeStart <- c(longitudeStart, dati$Longitude[i_row])
+    latitudeStart <- c(latitudeStart, dati$Latitude[i_row])
+    
+    latitudeEnd <- c(latitudeEnd, dati$Latitude[i_row-1])
+    longitudeEnd <- c(longitudeEnd, dati$Longitude[i_row-1])
+    
+    label <- dati$Label[i_row-1]
+    
+    distanceTotal_i <- 0
+    vel_max_i <- 0
+    timeTotal_i <- 0
+    n_hcr <- 0
+    n_sr <- 0
+    n_vr <- 0
+    vr <- 0
+    n_777 <- 0
+    n_points <- 0
+    altitudeSum <- 0
+    
+  }
+  
+}
+dati_fin <- data.frame(
+  longitudeStart = longitudeStart,
+  latitudeStart = latitudeStart,
+  latitudeEnd = latitudeEnd,
+  longitudeEnd = longitudeEnd,
+  altitudeMean = altitudeMean,
+  label = label,
+  n777 = n777,
+  npoints = npoints,
+  vcr = vcr,
+  sr = sr,
+  hcr = hcr,
+  vel_max = vel_max,
+  time_total = time_total,
+  distanceTotal = distanceTotal)
+
+#info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='hash')
+
+#dati$state <- as.character(info$state)
+#dati$country <- as.character(info$country)
+#dati$city <- as.character(info$city)
+
+write.csv(dati_fin,file="dataset_compresso.csv" ,row.names=FALSE) 
