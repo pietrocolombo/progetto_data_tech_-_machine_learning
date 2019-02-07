@@ -136,7 +136,7 @@ for(i_row in 2:nrow(dati))
     n_hcr <- 0
     n_sr <- 0
     n_vr <- 0
-    vr <- 0
+    # vr <- 0
     n_777 <- 0
     n_points <- 0
     altitudeSum <- 0
