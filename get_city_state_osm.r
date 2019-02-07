@@ -36,13 +36,13 @@ for(i_row in 1:nrow(dati))
 }
 dati$stateStart <- stateStart
 dati$countryStart <- countryStart
-cityStart <- cityStart
+dati$cityStart <- cityStart
 
-stateEnd <- stateEnd
-countryEnd <- countryEnd
-cityStart <- cityStart
+dati$stateEnd <- stateEnd
+dati$countryEnd <- countryEnd
+dati$cityEnd <- cityEnd
 
-write.csv(dati_fin,file="dataset_compresso_info_city.csv" ,row.names=FALSE) 
+write.csv(dati,file="dataset_compresso_info_city.csv" ,row.names=FALSE) 
 
   
 
