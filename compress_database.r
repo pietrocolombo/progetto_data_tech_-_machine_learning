@@ -128,7 +128,7 @@ for(i_row in 2:nrow(dati))
     latitudeEnd[i] <- dati$Latitude[i_row-1]
     longitudeEnd[i] <- dati$Longitude[i_row-1]
     
-    label[i] <- dati$Label[i_row-1]
+    label[i] <- as.character(dati$Label[i_row-1])
     
     distanceTotal_i <- 0
     vel_max_i <- 0
@@ -155,7 +155,7 @@ dati_fin <- data.frame(
   latitudeEnd = latitudeEnd,
   longitudeEnd = longitudeEnd,
   altitudeMean = altitudeMean,
-  label = as.character(label),
+  label = label,
   n777 = n777,
   npoints = npoints,
   vcr = vcr,
