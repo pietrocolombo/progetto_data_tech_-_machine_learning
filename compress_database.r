@@ -4,7 +4,7 @@
 #  library("revgeo")
 #}
 
-perc_csv <- "../progetto_data_tech_&_machine_learning_dataset/dataset_with_add_features.csv"
+perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 file.remove("dataset_with_osm_city.csv")
@@ -70,7 +70,7 @@ n777 <- vector(mode="double", length=dim_array)
 # n punti di un percorso
 npoints <- vector(mode="double", length=dim_array)
 
-i <- 2
+i <- 1
 
 for(i_row in 2:nrow(dati))
 {
@@ -116,17 +116,17 @@ for(i_row in 2:nrow(dati))
     distanceTotal[i] <- distanceTotal_i
     time_total[i] <- timeTotal_i
     vel_max[i] <- vel_max_i
-    hcr[i] <- n_hcr/distanceTotal
-    sr[i] <- n_sr/distanceTotal
-    vcr[i] <- n_vr/distanceTotal
+    hcr[i] <- n_hcr/distanceTotal_i
+    sr[i] <- n_sr/distanceTotal_i
+    vcr[i] <- n_vr/distanceTotal_i
     npoints[i] <- n_points
     n777[i] <- n_777
     altitudeMean[i] <- altitudeSum/(n_points-n_777)
     longitudeStart[i] <- dati$Longitude[i_row]
     latitudeStart[i] <- dati$Latitude[i_row]
     
-    latitudeEnd[i-1] <- dati$Latitude[i_row-1]
-    longitudeEnd[i-1] <- dati$Longitude[i_row-1]
+    latitudeEnd[i] <- dati$Latitude[i_row-1]
+    longitudeEnd[i] <- dati$Longitude[i_row-1]
     
     label[i] <- dati$Label[i_row-1]
     
@@ -146,8 +146,8 @@ for(i_row in 2:nrow(dati))
   
 }
 
-latitudeEnd[i] <- dati$Latitude[nrow(dati)]
-longitudeEnd[i] <- dati$Longitude[nrow(dati)]
+latitudeEnd[i-1] <- dati$Latitude[nrow(dati)]
+longitudeEnd[i-1] <- dati$Longitude[nrow(dati)]
 
 dati_fin <- data.frame(
   longitudeStart = longitudeStart,
@@ -155,7 +155,7 @@ dati_fin <- data.frame(
   latitudeEnd = latitudeEnd,
   longitudeEnd = longitudeEnd,
   altitudeMean = altitudeMean,
-  label = label,
+  label = as.character(label),
   n777 = n777,
   npoints = npoints,
   vcr = vcr,
