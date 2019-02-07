@@ -39,12 +39,23 @@ angle <- dati$angle
 
 for(i_row in 1:nrow(dati))
 {
+  if(i_row %% 10000 == 0)
+  {
+    print(i_row)
+  }
   if(cond[i_row])
   {
     
     distance[i_row] <- distGeo(c(longitudine[i_row-1], latitudine[i_row-1]), c(longitudine[i_row], latitudine[i_row]))
     delta_time[i_row] <- as.numeric(difftime(date_time[i_row], date_time[i_row-1], units = "secs"))
-    vel[i_row] <- distance[i_row]/delta_time[i_row]
+    if(distance[i_row] == 0)
+    {
+      vel[i_row] = 0
+    }
+    else
+    {
+      vel[i_row] <- distance[i_row]/delta_time[i_row]
+    }
     bearing <- atan2(sin(deg2rad(longitudine[i_row]) - deg2rad(longitudine[i_row-1])) * cos(deg2rad(latitudine[i_row])),
                      cos(deg2rad(latitudine[i_row-1])) * sin(deg2rad(latitudine[i_row])) - sin(deg2rad(latitudine[i_row-1]))
                      * cos(deg2rad(latitudine[i_row]))

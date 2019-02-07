@@ -12,6 +12,17 @@ file.remove("dataset_with_osm_city.csv")
 # TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
 cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
 
+cond_delta_angolo <- abs(dati$angle[-nrow(dati)] - dati$angle[-1]) > delta_angolo
+
+cond_vel <- dati$vel < vel_tr
+
+cond_vel_0 <- dati$vel > 0
+
+cond_alt_777 <- dati$Altitude == -777
+
+cond_vr <- abs(dati$vel[- 1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)] > vr_soglia
+
+
 
 # soglie per calcolo features
 delta_angolo <- 0.8
@@ -59,6 +70,10 @@ npoints <- c()
 
 for(i_row in 2:nrow(dati))
 {
+  if(i_row %% 10000 == 0)
+  {
+    print(i_row)
+  }
   if(cond[i_row])
   {
     distanceTotal_i <- distanceTotal_i + dati$distance[i_row]
@@ -66,23 +81,23 @@ for(i_row in 2:nrow(dati))
     if(dati$vel[i_row] > vel_max_i){
       vel_max_i <- dati$vel[i_row]
     }
-    if(abs(dati$angle[i_row-1] - dati$angle[i_row]) > delta_angolo)
+    if(cond_delta_angolo[i_row])
     {
       n_hcr <- n_hcr + 1
     }
-    if(dati$vel[i_row] < vel_tr)
+    if(cond_vel[i_row])
     {
       n_sr <- n_sr + 1
     }
-    if(dati$vel[i_row] > 0)
+    if(cond_vel_0[i_row])
     {
-      vr <- abs(dati$vel[i_row - 1] - dati$vel[i_row]) / dati$vel[i_row]
-      if(vr > vr_soglia)
+      #vr <- abs(dati$vel[i_row - 1] - dati$vel[i_row]) / dati$vel[i_row]
+      if(cond_vr[i_row])
       {
         n_vr <- n_vr + 1
       }
     }
-    if(dati$Altitude[i_row] == -777)
+    if(cond_alt_777[i_row])
     {
       n_777 <- n_777 + 1
     }
@@ -95,7 +110,7 @@ for(i_row in 2:nrow(dati))
   else
   {
     distanceTotal <- c(distanceTotal, distanceTotal_i)
-    time_total <- c(timetotal, timeTotal_i)
+    time_total <- c(time_total, timeTotal_i)
     vel_max <- c(vel_max, vel_max_i)
     hcr <- c(hcr, (n_hcr/distanceTotal))
     sr <- c(sr, (n_sr/distanceTotal))
