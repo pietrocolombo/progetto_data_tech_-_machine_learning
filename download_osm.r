@@ -7,11 +7,14 @@ if(!require(RCurl)){
 perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
-perc <- "osm/"
+perc <- "osm_n/"
 
 cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
 
 index <- 0
+
+latitude <- c()
+longitude <- c()
 
 for(i_row in 1:nrow(dati))
 {
@@ -19,7 +22,7 @@ for(i_row in 1:nrow(dati))
   {
     print(i_row)
   }
-  if(cond)
+  if(cond[i_row])
   {
    index <- index + 1 
   }
@@ -51,7 +54,17 @@ for(i_row in 1:nrow(dati))
     writeLines(osm, fileConn)
     close(fileConn)
     
+    latitude <- c(latitude, dati$Latitude[i_row - (index%/%2)])
+    longitude <- c(longitude, dati$Longitude[i_row - (index%/%2)])
+    
     index <- 0
   }
 }
+
+dati_fin <- data.frame(
+  latitude = latitude,
+  longitude = longitude
+)
+
+write.csv(dati_fin,file="dataset_compresso.csv" ,row.names=FALSE)
 
