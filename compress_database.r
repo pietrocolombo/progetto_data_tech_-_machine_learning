@@ -10,8 +10,8 @@ dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 file.remove("dataset_with_osm_city.csv")
 
 # soglie per calcolo features
-delta_angolo <- 0.8
-vel_tr <- 0.3
+delta_angolo <- 0.5
+vel_tr <- 0.5
 vr_soglia <- 0.2
 
 # TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
