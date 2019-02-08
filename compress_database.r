@@ -38,6 +38,8 @@ n_sr <- 0
 n_vr <- 0
 vr <- 0
 altitudeSum <- 0
+# valore di deault inizialedi 
+altitude_max <- -776
 n_777 <- 0
 n_points <- 0
 
@@ -61,6 +63,8 @@ Time_end <- vector(mode="character", length=dim_array)
 
 # inizializzazione vettore altitudine media del percorso
 altitudeAvg <- vector(mode="double", length=dim_array)
+# inizializzazione vettore del'altitudine massima raggiunta durante il percorso
+altitudeMax <- vector(mode="double", length=dim_array)
 # inizializzazione vettore latitudine del punto di partenza
 latitudeStart <- vector(mode="double", length=dim_array)
 latitudeStart[1] <- dati$Latitude[1]
@@ -120,6 +124,10 @@ for(i_row in 2:nrow(dati))
     else
     {
       altitudeSum <- altitudeSum + dati$Altitude[i_row]
+      if(altitude_max < dati$Altitude[i_row])
+      {  
+        altitude_max <- dati$Altitude[i_row]
+      }
     }
     n_points <- n_points + 1
   }
@@ -137,6 +145,7 @@ for(i_row in 2:nrow(dati))
     n777[i] <- n_777
     
     altitudeAvg[i] <- altitudeSum/(n_points-n_777)
+    altitudeMax[i] <- altitude_max
     latitudeEnd[i] <- dati$Latitude[i_row-1]
     longitudeEnd[i] <- dati$Longitude[i_row-1]
     label[i] <- as.character(dati$Label[i_row-1])
@@ -161,6 +170,7 @@ for(i_row in 2:nrow(dati))
     n_777 <- 0
     n_points <- 0
     altitudeSum <- 0
+    altitude_max <- -776
     
     i <- i+1
   }
@@ -178,6 +188,7 @@ npoints[i] <- n_points
 n777[i] <- n_777
 
 altitudeAvg[i] <- altitudeSum/(n_points-n_777)
+altitudeMax[i] <- altitude_max
 latitudeEnd[i] <- dati$Latitude[i_row]
 longitudeEnd[i] <- dati$Longitude[i_row]
 label[i] <- as.character(dati$Label[i_row])
@@ -188,25 +199,26 @@ Id_user[i] <- as.character(dati$Id_user[i_row])
 Time_end[i] <- as.character(dati$Date_Time[i_row])
 
 dati_fin <- data.frame(
-  TimeStart = Time_start,
-  TimeEnd = Time_end,
+  Id_user = Id_user,
+  Id_perc = Id_perc,
+  label = label,
   longitudeStart = longitudeStart,
   latitudeStart = latitudeStart,
   latitudeEnd = latitudeEnd,
   longitudeEnd = longitudeEnd,
-  vel_max = vel_max,
-  vel_avg = vel_avg,
-  time_total = time_total,
+  TimeStart = Time_start,
+  TimeEnd = Time_end,
   distanceTotal = distanceTotal,
-  altitudeAvg = altitudeAvg * 0.3048,
+  time_total = time_total,
   n777 = n777,
   npoints = npoints,
+  vel_avg = vel_avg,
+  vel_max = vel_max,
+  altitudeAvg = altitudeAvg * 0.3048,
+  altitudeMax = altitudeMax * 0.3048,
   vcr = vcr,
   sr = sr,
-  hcr = hcr,
-  Id_user = Id_user,
-  Id_perc = Id_perc,
-  label = label
+  hcr = hcr
   )
 
 #info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='hash')
