@@ -19,7 +19,7 @@ cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[
 
 dim_array <- table(cond)["FALSE"]
 
-cond_delta_angolo <- abs(dati$angle[-nrow(dati)] - dati$angle[-1]) > delta_angolo
+cond_delta_angolo <- c(FALSE, abs(dati$angle[-nrow(dati)] - dati$angle[-1]) > delta_angolo)
 
 cond_vel <- dati$vel < vel_tr
 
@@ -27,7 +27,7 @@ cond_vel_0 <- dati$vel > 0
 
 cond_alt_777 <- dati$Altitude == -777
 
-cond_vr <- (abs(dati$vel[-1] - dati$vel[-nrow(dati)]) / dati$vel[-nrow(dati)]) > vr_soglia
+cond_vr <- c(FALSE, (abs(dati$vel[-1] - dati$vel[-nrow(dati)]) / dati$vel[-1]) > vr_soglia)
 
 # inizializzazione variabili temporanee per ogni traiettoria
 distanceTotal_i <- 0
@@ -45,10 +45,22 @@ n_points <- 0
 distanceTotal <- vector(mode="double", length=dim_array)
 time_total <- vector(mode="double", length=dim_array)
 vel_max <- vector(mode="double", length=dim_array)
+vel_avg <- vector(mode="double", length=dim_array)
+
 # inizializzazione vettore delle label 
 label <- vector(mode="character", length=dim_array)
+# inizializzazione vettore ID_perc
+Id_perc <- vector(mode="character", length=dim_array)
+# inizializzazione vettore ID_user
+Id_user <- vector(mode="character", length=dim_array)
+# inizializzazione vettore Time_start che rappresenta il time stamp di inizio del percorso
+Time_start <- vector(mode="character", length=dim_array)
+Time_start[1] <- as.character(dati$Date_Time[1])
+# inizializzazione vettore Time_end che rappresenta il time stamp di fine del percorso
+Time_end <- vector(mode="character", length=dim_array)
+
 # inizializzazione vettore altitudine media del percorso
-altitudeMean <- vector(mode="double", length=dim_array)
+altitudeAvg <- vector(mode="double", length=dim_array)
 # inizializzazione vettore latitudine del punto di partenza
 latitudeStart <- vector(mode="double", length=dim_array)
 latitudeStart[1] <- dati$Latitude[1]
@@ -113,23 +125,32 @@ for(i_row in 2:nrow(dati))
   }
   else
   {
+    
     distanceTotal[i] <- distanceTotal_i
     time_total[i] <- timeTotal_i
     vel_max[i] <- vel_max_i
+    vel_avg[i] <- distanceTotal_i/timeTotal_i
     hcr[i] <- n_hcr/distanceTotal_i
     sr[i] <- n_sr/distanceTotal_i
     vcr[i] <- n_vr/distanceTotal_i
     npoints[i] <- n_points
     n777[i] <- n_777
-    altitudeMean[i] <- altitudeSum/(n_points-n_777)
-    longitudeStart[i] <- dati$Longitude[i_row]
-    latitudeStart[i] <- dati$Latitude[i_row]
     
+    altitudeAvg[i] <- altitudeSum/(n_points-n_777)
     latitudeEnd[i] <- dati$Latitude[i_row-1]
     longitudeEnd[i] <- dati$Longitude[i_row-1]
-    
     label[i] <- as.character(dati$Label[i_row-1])
     
+    Id_perc[i] <- as.character(dati$Id_perc[i_row-1])
+    Id_user[i] <- as.character(dati$Id_user[i_row-1])
+    
+    Time_end[i] <- as.character(dati$Date_Time[i_row-1])
+    
+    longitudeStart[i+1] <- dati$Longitude[i_row]
+    latitudeStart[i+1] <- dati$Latitude[i_row]
+    Time_start[i+1] <- as.character(dati$Date_Time[i_row])
+    
+    # reset parametri per il nuovo percorso
     distanceTotal_i <- 0
     vel_max_i <- 0
     timeTotal_i <- 0
@@ -145,25 +166,48 @@ for(i_row in 2:nrow(dati))
   }
   
 }
+# assegnamento parametri per l'ultimo percorso del file
+distanceTotal[i] <- distanceTotal_i
+time_total[i] <- timeTotal_i
+vel_max[i] <- vel_max_i
+vel_avg[i] <- distanceTotal_i/timeTotal_i
+hcr[i] <- n_hcr/distanceTotal_i
+sr[i] <- n_sr/distanceTotal_i
+vcr[i] <- n_vr/distanceTotal_i
+npoints[i] <- n_points
+n777[i] <- n_777
 
-latitudeEnd[i-1] <- dati$Latitude[nrow(dati)]
-longitudeEnd[i-1] <- dati$Longitude[nrow(dati)]
+altitudeAvg[i] <- altitudeSum/(n_points-n_777)
+latitudeEnd[i] <- dati$Latitude[i_row]
+longitudeEnd[i] <- dati$Longitude[i_row]
+label[i] <- as.character(dati$Label[i_row])
+
+Id_perc[i] <- as.character(dati$Id_perc[i_row])
+Id_user[i] <- as.character(dati$Id_user[i_row])
+
+Time_end[i] <- as.character(dati$Date_Time[i_row])
 
 dati_fin <- data.frame(
+  TimeStart = Time_start,
+  TimeEnd = Time_end,
   longitudeStart = longitudeStart,
   latitudeStart = latitudeStart,
   latitudeEnd = latitudeEnd,
   longitudeEnd = longitudeEnd,
-  altitudeMean = altitudeMean,
-  label = label,
+  vel_max = vel_max,
+  vel_avg = vel_avg,
+  time_total = time_total,
+  distanceTotal = distanceTotal,
+  altitudeAvg = altitudeAvg * 0.3048,
   n777 = n777,
   npoints = npoints,
   vcr = vcr,
   sr = sr,
   hcr = hcr,
-  vel_max = vel_max,
-  time_total = time_total,
-  distanceTotal = distanceTotal)
+  Id_user = Id_user,
+  Id_perc = Id_perc,
+  label = label
+  )
 
 #info <- revgeo(longitude = dati$Longitude, latitude = dati$Latitude, output='hash')
 
