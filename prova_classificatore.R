@@ -20,6 +20,14 @@ if(!require(polycor)){
   install.packages("polycor")
   library("polycor")
 }
+if(!require(DataExplorer)){
+  install.packages("DataExplorer")
+  library("DataExplorer")
+}
+if(!require(Hmisc)){
+  install.packages("Hmisc")
+  library("Hmisc")
+}
 
 
 
@@ -27,7 +35,7 @@ perc_csv <- "dataset_compresso_info_city_11_47.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
-dati_prova = dati[(!dati$altitudeAvg) != "NA", ]
+dati = dati[!(is.na(dati$altitudeAvg)), ]
 
 ## PREPROCESSING DATA 
 
@@ -43,14 +51,18 @@ dati$stateEnd <- as.character(dati$stateEnd)
 # Creation of a new boolean attribute that we'll use to train classifier
 dati$state_changed <- dati$stateStart != dati$stateEnd
 
-
+dati$label[dati$label == "taxi"] <- "car"
 
 # reconvert from character to factor
 dati$label <- as.factor(dati$label)
 dati$stateStart <- as.factor(dati$stateStart)
 dati$stateEnd <- as.factor(dati$stateEnd)
 
+## data analisys
 
+# introduce(dati)
+# plot_intro(dati)
+# plot_bar(dati)
 
 #Creation of the table used for classification phase
 
@@ -69,62 +81,53 @@ data_classification <- data.frame(
 )
 
 
+## CORRELATION MATRIX EVALUATION
+# data_classification <- as.integer(data_classification)
+# head(data_classification)
+# correlation_matrix <- data_classification[,2:length(data_classification)]
+# c <- cor(correlation_matrix)
+# corrplot(c, type = "upper", 
+#          order = "hclust", tl.col = "black", tl.srt = 45)
 
-# In this section we make sure that the sample of the training set give us all the all 8 labels
+# In this section we make sure that the sample of the training set give us all the all 11 labels
 repeat{
 # function useful to keep trace of the division (3033 is a random nummber, idk why)
 set.seed(3033)
-# variable to partition dataset
-intrain <- createDataPartition(y = data_classification$target, p = 0.7, list = FALSE)
-training_set <- data_classification[intrain, ]
+  # variable to partition dataset
+  # intrain <- createDataPartition(y = data_classification$target, p = 0.7, list = FALSE)
+  # training_set <- data_classification[intrain, ]
+  # label_training <- training_set$target
+  # test_set <- data_classification[-intrain, ]
+  
+# SPLIT DATASET
+p = 0.8
+sample = sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+training_set = data_classification[sample, ]
 label_training <- training_set$target
-test_set <- data_classification[-intrain, ]
+test_set = data_classification[-sample, ]
 
 if(length(levels(label_training)) == 8)
   break
 }
 
 
-dati$label[dati$label == "taxi"] <- "car"
-training_wo_string <- training_set 
-
-corr <- hetcor(training_set)
-# training_wo_string$target <- as.character(training_wo_string$target)
-# training_wo_string$target[training_wo_string$target == "walk"] <- "1"
-# training_wo_string$target[training_wo_string$target == "bus"] <- "2"
-# training_wo_string$target[training_wo_string$target == "car"] <- "3"
-# training_wo_string$target[training_wo_string$target == "bike"] <- "4"
-# training_wo_string$target[training_wo_string$target == "subway"] <- "5"
-# training_wo_string$target[training_wo_string$target == "train"] <- "6"
-# training_wo_string$target[training_wo_string$target == "boat"] <- "7"
-# training_wo_string$target[training_wo_string$target == "airplane"] <- "8"
-# training_wo_string$target <- as.integer(training_wo_string$target)
-
-
-
 # view dimension of training and test set
-dim(training_wo_string)
+dim(training_set)
 dim(test_set)
 
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
-#plot(cor(training_wo_string))
-correlation <- rquery.cormat(training_wo_string)
-
-M <-cor(training_wo_string)
-corrplot(M, type="upper", order="hclust",
-         col=brewer.pal(n=8, name="RdYlBu"))
 
 
 
-training_wo_string[["target"]] = factor(training_wo_string[["target"]])
+training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
 set.seed(3233)
 
-svm_Linear <- train(target ~., data = training_wo_string, method = "svmLinear",
+svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
                     trControl=trctrl,
                     preProcess = c("center", "scale"),
                     tuneLength = 10)
@@ -132,7 +135,7 @@ svm_Linear <- train(target ~., data = training_wo_string, method = "svmLinear",
 # Now I try to tune C parameter to obtain a better accuracy
 grid <- expand.grid(C = c(0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,5))
 
-svm_Linear_Grid <- train(target ~., data = training_wo_string, method = "svmLinear",
+svm_Linear_Grid <- train(target ~., data = training_set, method = "svmLinear",
                          trControl=trctrl,
                          preProcess = c("center", "scale"),
                          tuneGrid = grid,
