@@ -66,5 +66,5 @@ dati_fin <- data.frame(
   longitude = longitude
 )
 
-write.csv(dati_fin,file="dataset_compresso.csv" ,row.names=FALSE)
+write.csv(dati_fin,file="lat_lon.csv" ,row.names=FALSE)
 
