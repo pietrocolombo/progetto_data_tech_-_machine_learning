@@ -28,8 +28,8 @@ for(i_row in 1:nrow(dati))
   }
   else
   {
-    url <- "http://overpass-api.de/api/interpreter?data=("
-    
+    #url <- "http://lz4.overpass-api.de/api/interpreter?data=("
+    url <- "https://overpass.kumi.systems/api/interpreter?data=("
     area <- paste0("(around:150,",dati$Latitude[i_row - (index%/%2)],",",dati$Longitude[i_row - (index%/%2)], ")")
     
     highwaysQuery <- paste0("node[highway]", area, ";",
