@@ -3,6 +3,14 @@
 #  install.packages("revgeo")
 #  library("revgeo")
 #}
+if(!require(caret)){
+  install.packages("caret")
+  library("caret")
+}
+if(!require(corrplot)){
+  install.packages("corrplot")
+  library("corrplot")
+}
 
 perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")

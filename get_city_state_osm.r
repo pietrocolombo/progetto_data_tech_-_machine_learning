@@ -42,7 +42,7 @@ dati$stateEnd <- stateEnd
 dati$countryEnd <- countryEnd
 dati$cityEnd <- cityEnd
 
-write.csv(dati,file="dataset_compresso_info_city.csv" ,row.names=FALSE) 
+write.csv(dati,file="dataset_compresso_info_city_v2.csv" ,row.names=FALSE) 
 
   
 
