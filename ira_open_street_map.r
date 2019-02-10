@@ -1,4 +1,18 @@
+# abbiamo opportunamente modificato ira_open_street_map per leggere oltre alle strade
+# anche i tag per la ferrovia e gli aereoporti
 
+# grazie a ira_open_street_map otteniamo le informazione della way più vicina con i suoi relativi tag
+
+# per far funzionare questo script bisogna avere ROS (noi abbiamo usato la versione ROS_KINETIC)
+# far partire il nodo con il comando:
+# rosrun ira_open_street_map osm_query_node nome_mappa.osm
+
+# aprire rstudio da terminale e lanciare questo script
+
+# query per il punto iniziale
+point_start <- TRUE
+
+# carichiamo il dataset
 perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
@@ -11,7 +25,7 @@ Longitude <- vector(mode="double", length=dim_array)
 
 n_row<- vector(mode="double", length=dim_array)
 
-
+# creiamo i vettori per le informazioni che otteniamo
 highway <- vector(mode="character", length=dim_array)
 aeroway <- vector(mode="character", length=dim_array)
 railway <- vector(mode="character", length=dim_array)
@@ -37,8 +51,16 @@ for(i_row in 1:nrow(dati))
   {
     callroslatlon <- "rosservice call /ira_open_street_map/latlon_2_xy \"latitude: "
     
-    callroslatlon <- paste0(callroslatlon, dati$Latitude[i_row - (index%/%2)])
-    callroslatlon <- paste0(callroslatlon, "\nlongitude: ", dati$Longitude[i_row - (index%/%2)],"\"")
+    if(point_start)
+    {
+      callroslatlon <- paste0(callroslatlon, dati$Latitude[i_row])
+      callroslatlon <- paste0(callroslatlon, "\nlongitude: ", dati$Longitude[i_row],"\"")
+    }
+    else
+    {
+      callroslatlon <- paste0(callroslatlon, dati$Latitude[i_row - (index%/%2)])
+      callroslatlon <- paste0(callroslatlon, "\nlongitude: ", dati$Longitude[i_row - (index%/%2)],"\"")
+    }
     
     cordinate <- system(callroslatlon, intern = TRUE)
     cordinate_split <- strsplit(cordinate, " ")
@@ -57,9 +79,16 @@ for(i_row in 1:nrow(dati))
     railway[i] <- info_way[16]
     sidewalk[i] <- info_way[17]
     
-    Latitude[i] <- dati$Latitude[i_row - (index%/%2)]
-    Longitude[i] <- dati$Longitude[i_row - (index%/%2)]
-    
+    if(point_start)
+    {
+      Latitude[i] <- dati$Latitude[i_row]
+      Longitude[i] <- dati$Longitude[i_row]
+    }
+    else
+    {
+      Latitude[i] <- dati$Latitude[i_row - (index%/%2)]
+      Longitude[i] <- dati$Longitude[i_row - (index%/%2)]
+    }
     n_row[i] <- i_row
     
     i <- i + 1
