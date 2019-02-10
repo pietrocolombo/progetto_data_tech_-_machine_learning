@@ -1,5 +1,5 @@
 # abbiamo opportunamente modificato ira_open_street_map per leggere oltre alle strade
-# anche i tag per la ferrovia e gli aereoporti
+# anche i tag per la ferrovia e gli aereoporti e per rispondere le informazioni della way
 
 # grazie a ira_open_street_map otteniamo le informazione della way più vicina con i suoi relativi tag
 
@@ -61,17 +61,17 @@ for(i_row in 1:nrow(dati))
       callroslatlon <- paste0(callroslatlon, dati$Latitude[i_row - (index%/%2)])
       callroslatlon <- paste0(callroslatlon, "\nlongitude: ", dati$Longitude[i_row - (index%/%2)],"\"")
     }
-    
+    # chiamo il servizio di ira_open_street_map che converte le cordinate lat_lon in cordinate cartesiane
     cordinate <- system(callroslatlon, intern = TRUE)
-    cordinate_split <- strsplit(cordinate, " ")
     
+    cordinate_split <- strsplit(cordinate, " ")
     x <- cordinate_split[[1]][2]
     y <- cordinate_split[[2]][2]
-    # callrosservice <- "rosservice call /ira_open_street_map/latlon_2_xy \""
-    
+
     callrosSnap <- "rosservice call /ira_open_street_map/snap_particle_xy_2 \"x: "
     callrosSnap <- paste0(callrosSnap, x, "\n", "y: ", y, "\n", "max_distance_radius: 50.0\"")
     
+    # chiamo il servizio di ira_open_street_map che mi da le informazioni della way
     info_way <- system(callrosSnap, intern = TRUE)
     
     highway[i] <- info_way[14]
@@ -106,4 +106,5 @@ dati_fin <- data.frame(
   sidewalk = sidewalk
 )
 
+# salvo le informazioni ottenute in un csv
 write.csv(dati_fin,file="type_road.csv" ,row.names=FALSE)
