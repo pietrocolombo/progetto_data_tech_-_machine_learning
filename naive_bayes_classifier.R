@@ -138,8 +138,35 @@ recall <- (diag(conf) / colSums(conf))
 # F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
 f1 = 2 * precision * recall / (precision + recall)
 
+aucs = c()
+plot(x=NA, y=NA, xlim=c(0,1), ylim=c(0,1),
+     ylab='True Positive Rate',
+     xlab='False Positive Rate',
+     bty='n')
+nbmodel = NaiveBayes(type ~ ., data=training_set[, 12])
+nbprediction=predict(nbmodel, newdata = test_set, type = "raw")
+score = nbprediction$posterior[, 'TRUE']
+lvls = levels(data_classification$target)
+for (target.id in 1:8) {
+  t =  as.factor(training_set$target == lvls[target.id])
+  actual.class = test_set$target == lvls[target.id]
+  pred = prediction(score, actual.class)
+  nbperf = performance(pred, "tpr", "fpr")
+  roc.x = unlist(nbperf@x.values)
+  roc.y = unlist(nbperf@y.values)
+  lines(roc.y ~ roc.x, col=type.id+1, lwd=2)
+  
+  nbauc = performance(pred, "auc")
+  nbauc = unlist(slot(nbauc, "y.values"))
+  aucs[type.id] = nbauc
+  
+}
 
-# 
+lines(x=c(0,1), c(0,1))
+
+mean(aucs)
+
+## Da usare per ROC
 # library("rpart")
 # rp <- rpart(target ~ ., data = )
 # library("ROCR")
@@ -147,6 +174,21 @@ f1 = 2 * precision * recall / (precision + recall)
 # 
 # plot(performance(pred, "tpr", "fpr"))
 # abline(0, 1, lty = 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # library(pROC)
 # rs <- roc.multi[['rocs']]
