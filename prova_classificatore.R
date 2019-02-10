@@ -80,14 +80,27 @@ data_classification <- data.frame(
   target = dati$label
 )
 
-
 ## CORRELATION MATRIX EVALUATION
+data_correlation <- data.frame(
+  vcr = dati$vcr,
+  sr = dati$sr,
+  hcr = dati$hcr,
+  vel_max = dati$vel_max,
+  vel_avg = dati$vel_avg,
+  altitude_max = dati$altitudeMax,
+  altitude_avg = dati$altitudeAvg,
+  tot_duration = dati$time_total,
+  tot_distance = dati$distanceTotal,
+  state_changed = dati$state_changed
+)
+corr=cor(data_correlation, use="complete.obs")
+corrplot.mixed(corr,tl.cex=0.5,upper="ellipse", tl.pos="lt",col = colorpanel(50, "red", "gray60", "blue4"))
+
 # data_classification <- as.integer(data_classification)
 # head(data_classification)
 # correlation_matrix <- data_classification[,2:length(data_classification)]
-# c <- cor(correlation_matrix)
-# corrplot(c, type = "upper", 
-#          order = "hclust", tl.col = "black", tl.srt = 45)
+c <- cor(data_correlation)
+corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
 
 # In this section we make sure that the sample of the training set give us all the all 11 labels
 repeat{
@@ -124,22 +137,33 @@ training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+fitControl <- trainControl(method = "repeatedcv",
+                           number = 10,
+                           repeats = 10,
+                           ## Estimate class probabilities
+                           classProbs = TRUE
+                           )
+
+
+
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, classProbs = "TRUE")
 set.seed(3233)
 
 svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
-                    trControl=trctrl,
+                    trControl=fitControl,
                     preProcess = c("center", "scale"),
+                    metric = "Kappa",
                     tuneLength = 10)
 
 # Now I try to tune C parameter to obtain a better accuracy
 grid <- expand.grid(C = c(0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,5))
 
-svm_Linear_Grid <- train(target ~., data = training_set, method = "svmLinear",
+svm_Linear_Grid <- train(target ~., data = training_set, method = "svmRadial",
                          trControl=trctrl,
                          preProcess = c("center", "scale"),
-                         tuneGrid = grid,
-                         tuneLength = 10)
+                         metric = "Kappa",
+                         tuneLength = 8)
 plot(svm_Linear_Grid)
 
 # Test phase
