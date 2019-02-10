@@ -28,7 +28,7 @@ if(!require(e1071)){
 
 
 
-perc_csv <- "dataset_compresso_info_city_11_47.csv"
+perc_csv <- "dataset_compresso_info_city_V3.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -61,6 +61,7 @@ dati$stateEnd <- as.factor(dati$stateEnd)
 # plot_intro(dati)
 # plot_bar(dati)
 
+normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
 #Creation of the table used for classification phase
 
 data_classification <- data.frame(
@@ -100,7 +101,7 @@ n <- nrow(dati)
 ntrain <- round(n*0.8)
 
 repeat{
-p <- 0.8
+p <- 0.7
 sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
 training_set <- data_classification[sample, ]
 label_training <- training_set$target
@@ -121,6 +122,7 @@ anyNA(data_classification)
 svm1 <- svm(target~., data = training_set,
             method = "C-classification",
             kernel = "radial",
+            scale = c("center","scale"),
             gamma = 1,
             cost = 10)
 
