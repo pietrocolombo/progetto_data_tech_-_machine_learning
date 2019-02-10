@@ -9,7 +9,7 @@ if(!require(caret)){
   library("caret")
 }
 
-perc_csv <- "dataset_compresso_info_city_11_47.csv"
+perc_csv <- "dataset_compresso_info_city_V3.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -102,23 +102,69 @@ anyNA(data_classification)
 # Training phase
 
 #trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-trctrl <- trainControl(method = "cv", number = 10)
+trctrl <- trainControl(method = "cv", number = 10, repeats = 3)
 
 x = training_set[, 1:10]
 y = training_set[, 11]
 
-# naive_bayes_model=train(x,
-#                         y,
-#                         preProcess= c("center","scale"),
-#                         method = 'nb',
-#                         trControl=trctrl)
-#                         #tuneLength = 10
-#                         #metric = "Kappa")
-# cm_0 <- confusionMatrix(naive_bayes_model)
-# #naive_bayes_model = naiveBayes(training_set, training_set$target)
-# test_pred <- predict(naive_bayes_model, newdata = test_set)
-# cm <- confusionMatrix(test_pred, test_set$target)
+naive_bayes_model=train(x,
+                        y,
+                        #preProcess= c("center","scale"),
+                        preProc = c("BoxCox", "center", "scale", "pca"),
+                        method = 'nb',
+                        trControl=trctrl)
+                        #tuneLength = 10
+                        #metric = "Kappa")
+#cm_0 <- confusionMatrix(naive_bayes_model)
+#naive_bayes_model = naiveBayes(training_set, training_set$target)
+test_pred <- predict(naive_bayes_model, newdata = test_set)
+cm <- confusionMatrix(test_pred, test_set$target)
+conf <- table(test_pred, test_set$target)
 
-nbm = naiveBayes(target ~., training_set)
-tp <- predict(nbm, newdata = test_set)
-c <- confusionMatrix(tp, test_set$target)
+n = sum(conf) # number of instances
+nc = nrow(conf) # number of classes
+diag = diag(conf) # number of correctly classified instances per class 
+rowsums = apply(conf, 1, sum) # number of instances per class
+colsums = apply(conf, 2, sum) # number of predictions per class
+p = rowsums / n # distribution of instances over the actual classes
+q = colsums / n # distribution of instances over the predicted classes
+
+accuracy <- sum(diag(conf)) / sum(conf)
+# precision is defined as the fraction of correct predictions for a certain class
+precision <- diag(conf) / rowSums(conf)
+# recall is the fraction of instances of a class that were correctly predicted
+recall <- (diag(conf) / colSums(conf))
+# F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
+f1 = 2 * precision * recall / (precision + recall)
+
+# library(pROC)
+# rs <- roc.multi[['rocs']]
+# plot.roc(rs[[1]])
+# sapply(2:length(rs),function(i) lines.roc(rs[[i]],col=i))
+# nbm = naiveBayes(target ~., training_set)
+# tp <- predict(nbm, newdata = test_set)
+# c <- confusionMatrix(tp, test_set$target)
+
+#write.csv(data_classification, "data_classification.csv", row.names=FALSE)
+
+# library(ggplot2)
+# library(scales)
+# 
+# ggplotConfusionMatrix <- function(m){
+#   mytitle <- paste("Accuracy", percent_format()(m$overall[1]),
+#                    "Kappa", percent_format()(m$overall[2]))
+#   p <-
+#     ggplot(data = as.data.frame(m$table) ,
+#            aes(x = Reference, y = Prediction)) +
+#     geom_tile(aes(fill = log(Freq)), colour = "white") +
+#     scale_fill_gradient(low = "white", high = "steelblue") +
+#     geom_text(aes(x = Reference, y = Prediction, label = Freq)) +
+#     theme(legend.position = "none") +
+#     ggtitle(mytitle)
+#   return(p)
+# }
+# 
+# ggplotConfusionMatrix(cm)
+# 
+# featurePlot(x, y, plot = "pairs")
+
