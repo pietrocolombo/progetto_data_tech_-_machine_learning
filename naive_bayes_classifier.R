@@ -97,21 +97,28 @@ dim(test_set)
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
-training_set[["target"]] = factor(training_set[["target"]])
+#training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+#trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+trctrl <- trainControl(method = "cv", number = 10)
 
-naive_bayes_model=train(target ~., 
-                        data=training_set, 
-                        preProcess= c("center","scale"),
-                        method = 'nb', 
-                        trControl=trctrl,
-                        tuneLength = 10)
+x = training_set[, 1:10]
+y = training_set[, 11]
 
-test_pred <- predict(naive_bayes_model, newdata = test_set)
+# naive_bayes_model=train(x,
+#                         y,
+#                         preProcess= c("center","scale"),
+#                         method = 'nb',
+#                         trControl=trctrl)
+#                         #tuneLength = 10
+#                         #metric = "Kappa")
+# cm_0 <- confusionMatrix(naive_bayes_model)
+# #naive_bayes_model = naiveBayes(training_set, training_set$target)
+# test_pred <- predict(naive_bayes_model, newdata = test_set)
+# cm <- confusionMatrix(test_pred, test_set$target)
 
-cm <- confusionMatrix(test_pred, test_set$target)
-
-#table(nb_predictions, data$label)
+nbm = naiveBayes(target ~., training_set)
+tp <- predict(nbm, newdata = test_set)
+c <- confusionMatrix(tp, test_set$target)
