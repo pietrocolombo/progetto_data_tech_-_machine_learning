@@ -2,15 +2,6 @@
 # dalle n righe che mi identificano un percorso
 # ottengo una riga per percorso
 
-if(!require(caret)){
-  install.packages("caret")
-  library("caret")
-}
-if(!require(corrplot)){
-  install.packages("corrplot")
-  library("corrplot")
-}
-
 # carico il csv che lo script add_features.r mi ha generato
 perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
