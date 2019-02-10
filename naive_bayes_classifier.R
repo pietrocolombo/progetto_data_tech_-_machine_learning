@@ -115,14 +115,42 @@ naive_bayes_model=train(x,
                         trControl=trctrl)
                         #tuneLength = 10
                         #metric = "Kappa")
-cm_0 <- confusionMatrix(naive_bayes_model)
+#cm_0 <- confusionMatrix(naive_bayes_model)
 #naive_bayes_model = naiveBayes(training_set, training_set$target)
 test_pred <- predict(naive_bayes_model, newdata = test_set)
 cm <- confusionMatrix(test_pred, test_set$target)
+conf <- table(test_pred, test_set$target)
+accuracy <- sum(diag(conf)) / sum(conf)
+precision <- diag(conf) / rowSums(conf)
 
+# library(pROC)
+# rs <- roc.multi[['rocs']]
+# plot.roc(rs[[1]])
+# sapply(2:length(rs),function(i) lines.roc(rs[[i]],col=i))
 # nbm = naiveBayes(target ~., training_set)
 # tp <- predict(nbm, newdata = test_set)
 # c <- confusionMatrix(tp, test_set$target)
 
 #write.csv(data_classification, "data_classification.csv", row.names=FALSE)
+
+# library(ggplot2)
+# library(scales)
+# 
+# ggplotConfusionMatrix <- function(m){
+#   mytitle <- paste("Accuracy", percent_format()(m$overall[1]),
+#                    "Kappa", percent_format()(m$overall[2]))
+#   p <-
+#     ggplot(data = as.data.frame(m$table) ,
+#            aes(x = Reference, y = Prediction)) +
+#     geom_tile(aes(fill = log(Freq)), colour = "white") +
+#     scale_fill_gradient(low = "white", high = "steelblue") +
+#     geom_text(aes(x = Reference, y = Prediction, label = Freq)) +
+#     theme(legend.position = "none") +
+#     ggtitle(mytitle)
+#   return(p)
+# }
+# 
+# ggplotConfusionMatrix(cm)
+# 
+# featurePlot(x, y, plot = "pairs")
 
