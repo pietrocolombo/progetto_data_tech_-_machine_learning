@@ -99,8 +99,8 @@ data_correlation <- data.frame(
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
   type = dati$tag,
-  #state_changed = dati$state_changed,
-  #target = dati$label
+  state_changed = dati$state_changed,
+  target = dati$label
 )
 
 
@@ -108,7 +108,7 @@ data_correlation <- data.frame(
 # corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
 corr <- hetcor(as.data.frame(data_correlation))
 ggcorrplot(corr$correlations, outline.col = "white", insig = "pch")
-theme(axis.text.x = element_text(size=10, angle=90, vjust=0.5), axis.text.y = element_text(size=10, vjust=0.5)) 
+theme(axis.text.x = element_text(size=10, angle=90, vjust=0.5), axis.text.y = element_text(size=10, vjust=0.5))
 labs(title = paste("Correlation Matrix"))
 
 #corr <- correlate(data_correlation, test=TRUE, corr.method="pearson", p.adjust.method="holm")
