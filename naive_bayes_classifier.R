@@ -9,7 +9,7 @@ if(!require(caret)){
   library("caret")
 }
 
-perc_csv <- "dataset_compresso_info_city_V3.csv"
+perc_csv <- "dataset_compresso_info_city_simple_tag.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -57,6 +57,7 @@ data_classification <- data.frame(
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
   state_changed = dati$state_changed,
+  tag = dati$tag,
   target = dati$label
 )
 
@@ -102,10 +103,10 @@ anyNA(data_classification)
 # Training phase
 
 #trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-trctrl <- trainControl(method = "cv", number = 10, repeats = 3)
+trctrl <- trainControl(method = "cv", number = 10)
 
-x = training_set[, 1:10]
-y = training_set[, 11]
+x = training_set[, 1:11]
+y = training_set[, 12]
 
 naive_bayes_model=train(x,
                         y,
@@ -136,6 +137,58 @@ precision <- diag(conf) / rowSums(conf)
 recall <- (diag(conf) / colSums(conf))
 # F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
 f1 = 2 * precision * recall / (precision + recall)
+
+aucs = c()
+plot(x=NA, y=NA, xlim=c(0,1), ylim=c(0,1),
+     ylab='True Positive Rate',
+     xlab='False Positive Rate',
+     bty='n')
+nbmodel = NaiveBayes(type ~ ., data=training_set[, 12])
+nbprediction=predict(nbmodel, newdata = test_set, type = "raw")
+score = nbprediction$posterior[, 'TRUE']
+lvls = levels(data_classification$target)
+for (target.id in 1:8) {
+  t =  as.factor(training_set$target == lvls[target.id])
+  actual.class = test_set$target == lvls[target.id]
+  pred = prediction(score, actual.class)
+  nbperf = performance(pred, "tpr", "fpr")
+  roc.x = unlist(nbperf@x.values)
+  roc.y = unlist(nbperf@y.values)
+  lines(roc.y ~ roc.x, col=type.id+1, lwd=2)
+  
+  nbauc = performance(pred, "auc")
+  nbauc = unlist(slot(nbauc, "y.values"))
+  aucs[type.id] = nbauc
+  
+}
+
+lines(x=c(0,1), c(0,1))
+
+mean(aucs)
+
+## Da usare per ROC
+# library("rpart")
+# rp <- rpart(target ~ ., data = )
+# library("ROCR")
+# pred <- prediction(predict(rp, type = "prob")[, 2], data)
+# 
+# plot(performance(pred, "tpr", "fpr"))
+# abline(0, 1, lty = 2)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # library(pROC)
 # rs <- roc.multi[['rocs']]

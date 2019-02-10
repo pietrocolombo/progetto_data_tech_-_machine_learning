@@ -2,6 +2,10 @@ if(!require(corrplot)){
   install.packages("corrplot")
   library("corrplot")
 }
+if(!require(ggcorrplot)){
+  install.packages("ggcorrplot")
+  library("ggcorrplot")
+}
 if(!require(colorspace)){
   install.packages("colorspace")
   library("colorspace")
@@ -22,13 +26,16 @@ if(!require(e1071)){
   install.packages("e1071")
   library("e1071")
 }
+if(!require()){
+  install.packages("e1071")
+  library("e1071")
+}
 
 
 
 
 
-
-perc_csv <- "dataset_compresso_info_city_V3.csv"
+perc_csv <- "dataset_compresso_info_city_simple_tag.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -61,7 +68,7 @@ dati$stateEnd <- as.factor(dati$stateEnd)
 # plot_intro(dati)
 # plot_bar(dati)
 
-normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
+#normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
 #Creation of the table used for classification phase
 
 data_classification <- data.frame(
@@ -75,6 +82,7 @@ data_classification <- data.frame(
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
   state_changed = dati$state_changed,
+  type = dati$tag,
   target = dati$label
 )
 
@@ -90,15 +98,23 @@ data_correlation <- data.frame(
   altitude_avg = dati$altitudeAvg,
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
-  state_changed = dati$state_changed
+  type = dati$tag,
+  state_changed = dati$state_changed,
+  target = dati$label
 )
 
 
-c <- cor(data_correlation)
-corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
+#c <- cor(data_correlation)
+# corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
+corr <- hetcor(as.data.frame(data_correlation))
+ggcorrplot(corr$correlations, outline.col = "white", insig = "pch")
+theme(axis.text.x = element_text(size=10, angle=90, vjust=0.5), axis.text.y = element_text(size=10, vjust=0.5))
+labs(title = paste("Correlation Matrix"))
 
-n <- nrow(dati)
-ntrain <- round(n*0.8)
+#corr <- correlate(data_correlation, test=TRUE, corr.method="pearson", p.adjust.method="holm")
+# corrplot(corr,type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
+# cor2(data_correlation)
+
 
 repeat{
 p <- 0.7
@@ -111,6 +127,7 @@ if(length(levels(label_training)) == 8  &&  length(levels(label_test)) == 8 )
   break
 }
 
+training_set[["target"]] = factor(training_set[["target"]])
 # view dimension of training and test set
 dim(training_set)
 dim(test_set)
@@ -118,16 +135,78 @@ dim(test_set)
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
 
 svm1 <- svm(target~., data = training_set,
             method = "C-classification",
-            kernel = "radial",
-            scale = c("center","scale"),
-            gamma = 1,
-            cost = 10)
+            kernal = "radial",
+            preProcess = c("center","scale"),
+            trControl=trctrl,
+            gamma = 0.5,
+            cost = 0.8)
 
 predict <- predict(svm1, test_set)
 cm <- confusionMatrix(predict,test_set$target)
 cm
 
 
+
+
+
+
+cor2 = function(df){
+  
+  stopifnot(inherits(df, "data.frame"))
+  stopifnot(sapply(df, class) %in% c("integer"
+                                     , "numeric"
+                                     , "factor"
+                                     , "character"))
+  
+  cor_fun <- function(pos_1, pos_2){
+    
+    # both are numeric
+    if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
+       class(df[[pos_2]]) %in% c("integer", "numeric")){
+      r <- stats::cor(df[[pos_1]]
+                      , df[[pos_2]]
+                      , use = "pairwise.complete.obs"
+      )
+    }
+    
+    # one is numeric and other is a factor/character
+    if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
+       class(df[[pos_2]]) %in% c("factor", "character")){
+      r <- sqrt(
+        summary(
+          stats::lm(df[[pos_1]] ~ as.factor(df[[pos_2]])))[["r.squared"]])
+    }
+    
+    if(class(df[[pos_2]]) %in% c("integer", "numeric") &&
+       class(df[[pos_1]]) %in% c("factor", "character")){
+      r <- sqrt(
+        summary(
+          stats::lm(df[[pos_2]] ~ as.factor(df[[pos_1]])))[["r.squared"]])
+    }
+    
+    # both are factor/character
+    if(class(df[[pos_1]]) %in% c("factor", "character") &&
+       class(df[[pos_2]]) %in% c("factor", "character")){
+      r <- lsr::cramersV(df[[pos_1]], df[[pos_2]], simulate.p.value = TRUE)
+    }
+    
+    return(r)
+  } 
+  
+  cor_fun <- Vectorize(cor_fun)
+  
+  # now compute corr matrix
+  corrmat <- outer(1:ncol(df)
+                   , 1:ncol(df)
+                   , function(x, y) cor_fun(x, y)
+  )
+  
+  rownames(corrmat) <- colnames(df)
+  colnames(corrmat) <- colnames(df)
+  
+  return(corrmat)
+}
