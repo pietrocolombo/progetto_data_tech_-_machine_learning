@@ -1,30 +1,23 @@
 
-#if(!require(revgeo)){
-#  install.packages("revgeo")
-#  library("revgeo")
-#}
-if(!require(caret)){
-  install.packages("caret")
-  library("caret")
-}
-if(!require(corrplot)){
-  install.packages("corrplot")
-  library("corrplot")
-}
+# dalle n righe che mi identificano un percorso
+# ottengo una riga per percorso
 
+# carico il csv che lo script add_features.r mi ha generato
 perc_csv <- "dataset_with_add_features.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
+# rimuoviamo il file che genera questo script
 file.remove("dataset_with_osm_city.csv")
 
 # soglie per calcolo features
-delta_angolo <- 0.35
-vel_tr <- 3.4
-vr_soglia <- 0.26
+delta_angolo <- 0.33 # angolo per il change rate in radianti
+vel_tr <- 0.89 # velocità in m/s  
+vr_soglia <- 0.26 # percentuale di cambio velocità
 
 # TRUE se la riga corrente e la precedente hanno stessa label, plt e utente
 cond <- c(TRUE, (dati$Id_user[-nrow(dati)] == dati$Id_user[-1]) & (dati$Id_perc[-nrow(dati)] == dati$Id_perc[-1]) & (dati$Label[-nrow(dati)] == dati$Label[-1]))
 
+# calcolo la dimensione della nuova tabella
 dim_array <- table(cond)["FALSE"]
 
 # inizializzazione condizioni per velocizzare l'esecuzione
@@ -114,13 +107,17 @@ for(i_row in 2:nrow(dati))
   }
   if(cond[i_row])
   {
+    # se sto scorrento lo stesso percorso
+    # aggiorno la distanza totale sommando le distanze parziali
     distanceTotal_i <- distanceTotal_i + dati$distance[i_row]
     timeTotal_i <- timeTotal_i + dati$delta_time[i_row]
     if(dati$vel[i_row] > vel_max_i){
+      # tengo traccia della velocità massima del percorso
       vel_max_i <- dati$vel[i_row]
     }
     if(cond_delta_angolo[i_row])
     {
+      # tengo conto del numero di volte che cambia direzione
       n_hcr <- n_hcr + 1
     }
     if(cond_vel[i_row])
@@ -146,7 +143,7 @@ for(i_row in 2:nrow(dati))
       #calcolo parametri dell'altitudine
       altitudeSum <- altitudeSum + dati$Altitude[i_row]
       if(altitude_max < dati$Altitude[i_row])
-      {  
+      {
         altitude_max <- dati$Altitude[i_row]
       }
     }

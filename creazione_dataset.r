@@ -1,5 +1,7 @@
 
-# acquisizione dati dai file plt per non perdere cifre decimali nei dati acquisisco i dati come carattere
+# script che legge i file .plt e il file delle label e assegna ad ogni punto la label associata
+# ogni cartella rappresenta un utente, noi consideriamo solo gli utenti che hanno il file labels.txt
+
 
 # prendo il percorso di ogni cartella
 dirs_perc = list.dirs("../progetto_data_tech_&_machine_learning_dataset/Geolife Trajectories 1.3/Data", recursive = FALSE)
@@ -9,6 +11,7 @@ dirs_name = list.files("../progetto_data_tech_&_machine_learning_dataset/Geolife
 first_time = TRUE
 file.remove("dataset_completo.csv")
 
+# ciclo su tutte le cartelle le quali indicano l'utente
 for (i_dirs in 1:length(dirs_perc)){
   print(i_dirs)
   # guardo il numedo di file nella cartella se è 3 ho le label poichè il mac vede un file Icon\r
@@ -21,12 +24,16 @@ for (i_dirs in 1:length(dirs_perc)){
     # ottendo il percorso delle traiettorie
     trajectory_perc <- paste(dirs_perc[i_dirs],"/Trajectory", sep = "")
     file_trajectory <- list.files(trajectory_perc)
+    # prendo i soli file .plt
     index_file <- grep(".plt",file_trajectory)
     
     # uniformo le date per avere poterle confrontare
     label$Start.Time.Posix <- as.POSIXct(label$Start.Time, format="%Y/%m/%d %H:%M:%OS", tz="GMT")
     label$End.Time.Posix <- as.POSIXct(label$End.Time, format="%Y/%m/%d %H:%M:%OS", tz="GMT")
+    
+    # ciclo sui file .plt del singolo utente se l'utente ha le label
     for (index in index_file){
+      # leggo un file .plt alla volta
       dati <- read.table(paste(trajectory_perc, "/", file_trajectory[index], sep = ''), header = FALSE, quote = "\"", skip = 6, sep = ",", colClasses = c("character", "character", "character", "character", "character", "character", "character") , numerals = "no.loss")
       # uniformo le date per avere poterle confrontare
       dati$Date_Time <- as.POSIXct(paste(dati$V6, dati$V7, sep = " "),format="%Y-%m-%d %H:%M:%OS", tz="GMT")
@@ -41,7 +48,7 @@ for (i_dirs in 1:length(dirs_perc)){
       # elimino Date e Time avengo già Date_Time
       dati$Date <- NULL
       dati$Time <- NULL
-      
+      # per non perdere informazione sulle cifre decimali delle cordinate
       options(digits=10)
       for(i in 1:3) {
         dati[,i] <- as.double(dati[,i])
@@ -52,12 +59,14 @@ for (i_dirs in 1:length(dirs_perc)){
       # aggiungo i id che identifica il percorso
       dati$Id_perc <- file_trajectory[index]
       
-      # aggiungo la colonna per la label
+      # aggiungo la colonna per la label vuota
       dati$Label <- ""
+      
+      # vettore per tener traccia delle label già associate ai punti
+      row_delete <- c()
       
       # verifico che abbiamo le label riferenti al file delle traiettorie
       # quindi guardo nella tabella delle label se ho una traiettoria con la label che parte con lo stesso timestamps
-      row_delete <- c()
       # siccome per ogni file plt ci possono essere più label
       # ciclo per ogni file su tutti gli elementi delle label
       if(nrow(label)>0)

@@ -1,8 +1,4 @@
 
-# decomment the line below if this is the first time you are running this script
-# the caret package it's useful to implement Support Vector Machine classifier
-
-
 source("http://www.sthda.com/upload/rquery_cormat.r")
 if(!require(caret)){
   install.packages("caret")
@@ -91,23 +87,23 @@ data_classification <- data.frame(
 
 # In this section we make sure that the sample of the training set give us all the all 11 labels
 repeat{
-# function useful to keep trace of the division (3033 is a random nummber, idk why)
-set.seed(3033)
+  # function useful to keep trace of the division (3033 is a random nummber, idk why)
+  set.seed(3033)
   # variable to partition dataset
   # intrain <- createDataPartition(y = data_classification$target, p = 0.7, list = FALSE)
   # training_set <- data_classification[intrain, ]
   # label_training <- training_set$target
   # test_set <- data_classification[-intrain, ]
   
-# SPLIT DATASET
-p = 0.8
-sample = sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
-training_set = data_classification[sample, ]
-label_training <- training_set$target
-test_set = data_classification[-sample, ]
-
-if(length(levels(label_training)) == 8)
-  break
+  # SPLIT DATASET
+  p = 0.8
+  sample = sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+  training_set = data_classification[sample, ]
+  label_training <- training_set$target
+  test_set = data_classification[-sample, ]
+  
+  if(length(levels(label_training)) == 8)
+    break
 }
 
 
@@ -152,11 +148,3 @@ test_pred_grid
 
 cm <- confusionMatrix(test_pred,test_set$target)
 cm_grid <-confusionMatrix(test_pred_grid,test_set$target)
-
-
-
-
-
-
-
-
