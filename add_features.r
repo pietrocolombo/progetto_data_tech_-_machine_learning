@@ -12,7 +12,7 @@ if(!require(geosphere)){
 # percorso del file che ha generato lo script creazione_dataset.r
 perc_csv <- "dataset_completo.csv"
 
-# rimuoviamo il file che genera questo cript
+# rimuoviamo il file che genera questo script
 file.remove("dataset_with_add_features.csv")
 
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
