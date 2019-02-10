@@ -24,10 +24,22 @@ if(!require(Hmisc)){
   install.packages("Hmisc")
   library("Hmisc")
 }
+if(!require(RGraphics)){
+  install.packages("RGraphics")
+  library("RGraphics")
+}
+if(!require(grid)){
+  install.packages("grid")
+  library("grid")
+}
+if(!require(gridExtra)){
+  install.packages("gridExtra")
+  library("gridExtra")
+}
 
 
 
-perc_csv <- "dataset_compresso_info_city_11_47.csv"
+perc_csv <- "dataset_compresso_info_city_simple_tag.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -76,6 +88,36 @@ data_classification <- data.frame(
   target = dati$label
 )
 
+features_analysis <- data.frame(
+  vcr = dati$vcr,
+  sr = dati$sr,
+  hcr = dati$hcr,
+  vel_max = dati$vel_max,
+  vel_avg = dati$vel_avg,
+  altitude_max = dati$altitudeMax,
+  altitude_avg = dati$altitudeAvg,
+  tot_duration = dati$time_total,
+  tot_distance = dati$distanceTotal,
+  state_changed = dati$state_changed
+)
+
+
+
+
+# bus_car <- data_classification[data_classification$target == "airplane" | data_classification$target == "bike", ]
+# g1<-ggplot(bus_car,aes(x=vcr,y=sr, shape=target, color=target))+
+# geom_point(size=3)
+# grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+# 
+
+
+# par(mar=c(1,1,1,1))
+# pairs(plane_car[,1:5],
+#       lower.panel=NULL)
+# pairs(plane_car[,5:10],
+#       lower.panel=NULL)
+
+
 
 ## CORRELATION MATRIX EVALUATION
 # data_classification <- as.integer(data_classification)
@@ -120,7 +162,7 @@ training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
 set.seed(3233)
 
 svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
@@ -128,23 +170,11 @@ svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
                     preProcess = c("center", "scale"),
                     tuneLength = 10)
 
-# Now I try to tune C parameter to obtain a better accuracy
-grid <- expand.grid(C = c(0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,5))
 
-svm_Linear_Grid <- train(target ~., data = training_set, method = "svmLinear",
-                         trControl=trctrl,
-                         preProcess = c("center", "scale"),
-                         tuneGrid = grid,
-                         tuneLength = 10)
-plot(svm_Linear_Grid)
 
 # Test phase
-
 test_pred <- predict(svm_Linear, newdata = test_set)
 test_pred
-
-test_pred_grid <- predict(svm_Linear_Grid, newdata = test_set)
-test_pred_grid
-
 cm <- confusionMatrix(test_pred,test_set$target)
-cm_grid <-confusionMatrix(test_pred_grid,test_set$target)
+#cm_grid <-confusionMatrix(test_pred_grid,test_set$target)
+cm
