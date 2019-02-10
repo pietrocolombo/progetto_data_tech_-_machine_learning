@@ -61,7 +61,7 @@ dati$stateEnd <- as.factor(dati$stateEnd)
 # plot_intro(dati)
 # plot_bar(dati)
 
-normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
+#normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
 #Creation of the table used for classification phase
 
 data_classification <- data.frame(
@@ -111,6 +111,7 @@ if(length(levels(label_training)) == 8  &&  length(levels(label_test)) == 8 )
   break
 }
 
+training_set[["target"]] = factor(training_set[["target"]])
 # view dimension of training and test set
 dim(training_set)
 dim(test_set)
@@ -118,16 +119,23 @@ dim(test_set)
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
 
 svm1 <- svm(target~., data = training_set,
             method = "C-classification",
-            kernel = "radial",
-            scale = c("center","scale"),
-            gamma = 1,
-            cost = 10)
+            kernal = "radial",
+            preProcess = c("center","scale"),
+            trControl=trctrl,
+            gamma = 0.5,
+            cost = 0.8)
 
 predict <- predict(svm1, test_set)
 cm <- confusionMatrix(predict,test_set$target)
 cm
+
+
+
+
+
 
 
