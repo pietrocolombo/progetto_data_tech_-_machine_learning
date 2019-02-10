@@ -9,7 +9,7 @@ if(!require(caret)){
   library("caret")
 }
 
-perc_csv <- "dataset_compresso_info_city_11_47.csv"
+perc_csv <- "dataset_compresso_info_city_V3.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -102,23 +102,27 @@ anyNA(data_classification)
 # Training phase
 
 #trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-trctrl <- trainControl(method = "cv", number = 10)
+trctrl <- trainControl(method = "cv", number = 10, repeats = 3)
 
 x = training_set[, 1:10]
 y = training_set[, 11]
 
-# naive_bayes_model=train(x,
-#                         y,
-#                         preProcess= c("center","scale"),
-#                         method = 'nb',
-#                         trControl=trctrl)
-#                         #tuneLength = 10
-#                         #metric = "Kappa")
-# cm_0 <- confusionMatrix(naive_bayes_model)
-# #naive_bayes_model = naiveBayes(training_set, training_set$target)
-# test_pred <- predict(naive_bayes_model, newdata = test_set)
-# cm <- confusionMatrix(test_pred, test_set$target)
+naive_bayes_model=train(x,
+                        y,
+                        #preProcess= c("center","scale"),
+                        preProc = c("BoxCox", "center", "scale", "pca"),
+                        method = 'nb',
+                        trControl=trctrl)
+                        #tuneLength = 10
+                        #metric = "Kappa")
+cm_0 <- confusionMatrix(naive_bayes_model)
+#naive_bayes_model = naiveBayes(training_set, training_set$target)
+test_pred <- predict(naive_bayes_model, newdata = test_set)
+cm <- confusionMatrix(test_pred, test_set$target)
 
-nbm = naiveBayes(target ~., training_set)
-tp <- predict(nbm, newdata = test_set)
-c <- confusionMatrix(tp, test_set$target)
+# nbm = naiveBayes(target ~., training_set)
+# tp <- predict(nbm, newdata = test_set)
+# c <- confusionMatrix(tp, test_set$target)
+
+#write.csv(data_classification, "data_classification.csv", row.names=FALSE)
+
