@@ -1,8 +1,4 @@
 
-# decomment the line below if this is the first time you are running this script
-# the caret package it's useful to implement Support Vector Machine classifier
-
-
 source("http://www.sthda.com/upload/rquery_cormat.r")
 if(!require(caret)){
   install.packages("caret")
@@ -80,47 +76,34 @@ data_classification <- data.frame(
   target = dati$label
 )
 
-## CORRELATION MATRIX EVALUATION
-data_correlation <- data.frame(
-  vcr = dati$vcr,
-  sr = dati$sr,
-  hcr = dati$hcr,
-  vel_max = dati$vel_max,
-  vel_avg = dati$vel_avg,
-  altitude_max = dati$altitudeMax,
-  altitude_avg = dati$altitudeAvg,
-  tot_duration = dati$time_total,
-  tot_distance = dati$distanceTotal,
-  state_changed = dati$state_changed
-)
-corr=cor(data_correlation, use="complete.obs")
-corrplot.mixed(corr,tl.cex=0.5,upper="ellipse", tl.pos="lt",col = colorpanel(50, "red", "gray60", "blue4"))
 
+## CORRELATION MATRIX EVALUATION
 # data_classification <- as.integer(data_classification)
 # head(data_classification)
 # correlation_matrix <- data_classification[,2:length(data_classification)]
-c <- cor(data_correlation)
-corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
+# c <- cor(correlation_matrix)
+# corrplot(c, type = "upper", 
+#          order = "hclust", tl.col = "black", tl.srt = 45)
 
 # In this section we make sure that the sample of the training set give us all the all 11 labels
 repeat{
-# function useful to keep trace of the division (3033 is a random nummber, idk why)
-set.seed(3033)
+  # function useful to keep trace of the division (3033 is a random nummber, idk why)
+  set.seed(3033)
   # variable to partition dataset
   # intrain <- createDataPartition(y = data_classification$target, p = 0.7, list = FALSE)
   # training_set <- data_classification[intrain, ]
   # label_training <- training_set$target
   # test_set <- data_classification[-intrain, ]
   
-# SPLIT DATASET
-p = 0.8
-sample = sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
-training_set = data_classification[sample, ]
-label_training <- training_set$target
-test_set = data_classification[-sample, ]
-
-if(length(levels(label_training)) == 8)
-  break
+  # SPLIT DATASET
+  p = 0.8
+  sample = sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+  training_set = data_classification[sample, ]
+  label_training <- training_set$target
+  test_set = data_classification[-sample, ]
+  
+  if(length(levels(label_training)) == 8)
+    break
 }
 
 
@@ -137,33 +120,22 @@ training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-fitControl <- trainControl(method = "repeatedcv",
-                           number = 10,
-                           repeats = 10,
-                           ## Estimate class probabilities
-                           classProbs = TRUE
-                           )
-
-
-
-
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, classProbs = "TRUE")
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
 set.seed(3233)
 
 svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
-                    trControl=fitControl,
+                    trControl=trctrl,
                     preProcess = c("center", "scale"),
-                    metric = "Kappa",
                     tuneLength = 10)
 
 # Now I try to tune C parameter to obtain a better accuracy
 grid <- expand.grid(C = c(0,0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2,5))
 
-svm_Linear_Grid <- train(target ~., data = training_set, method = "svmRadial",
+svm_Linear_Grid <- train(target ~., data = training_set, method = "svmLinear",
                          trControl=trctrl,
                          preProcess = c("center", "scale"),
-                         metric = "Kappa",
-                         tuneLength = 8)
+                         tuneGrid = grid,
+                         tuneLength = 10)
 plot(svm_Linear_Grid)
 
 # Test phase
@@ -176,11 +148,3 @@ test_pred_grid
 
 cm <- confusionMatrix(test_pred,test_set$target)
 cm_grid <-confusionMatrix(test_pred_grid,test_set$target)
-
-
-
-
-
-
-
-
