@@ -74,6 +74,16 @@ if(!file.exists(perc_csv_info))
     countryEnd = dati$countryEnd,
     cityEnd = dati$cityEnd)
   write.csv(dati_fin,file="info_city.csv" ,row.names=FALSE)
+  
+  print(sum(dati$stateStart == "State Not Found"))
+  print(sum(dati$stateEnd == "State Not Found"))
+  
+  print(sum(dati$countryStart == "Country Not Found"))
+  print(sum(dati$countryEnd == "Country Not Found"))
+  
+  print(sum(dati$cityStart == "City Not Found"))
+  print(sum(dati$cityEnd == "City Not Found"))
+  
 }
 else
 {
@@ -86,6 +96,15 @@ else
   dati$stateEnd <- info_city$stateEnd
   dati$countryEnd <- info_city$countryEnd
   dati$cityEnd <- info_city$cityEnd
+  
+  print(sum(dati$stateStart == "State Not Found"))
+  print(sum(dati$stateEnd == "State Not Found"))
+  
+  print(sum(dati$countryStart == "Country Not Found"))
+  print(sum(dati$countryEnd == "Country Not Found"))
+  
+  print(sum(dati$cityStart == "City Not Found"))
+  print(sum(dati$cityEnd == "City Not Found"))
 }
 
 # salvo le informazioni
