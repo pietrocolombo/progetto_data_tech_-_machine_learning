@@ -9,7 +9,7 @@ if(!require(caret)){
   library("caret")
 }
 
-perc_csv <- "dataset_compresso_info_city_V3.csv"
+perc_csv <- "dataset_compresso_info_city_simple_tag.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -57,6 +57,7 @@ data_classification <- data.frame(
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
   state_changed = dati$state_changed,
+  tag = dati$tag,
   target = dati$label
 )
 
@@ -102,10 +103,10 @@ anyNA(data_classification)
 # Training phase
 
 #trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 5)
-trctrl <- trainControl(method = "cv", number = 10, repeats = 3)
+trctrl <- trainControl(method = "cv", number = 10)
 
-x = training_set[, 1:10]
-y = training_set[, 11]
+x = training_set[, 1:11]
+y = training_set[, 12]
 
 naive_bayes_model=train(x,
                         y,
@@ -136,6 +137,16 @@ precision <- diag(conf) / rowSums(conf)
 recall <- (diag(conf) / colSums(conf))
 # F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
 f1 = 2 * precision * recall / (precision + recall)
+
+
+# 
+# library("rpart")
+# rp <- rpart(target ~ ., data = )
+# library("ROCR")
+# pred <- prediction(predict(rp, type = "prob")[, 2], data)
+# 
+# plot(performance(pred, "tpr", "fpr"))
+# abline(0, 1, lty = 2)
 
 # library(pROC)
 # rs <- roc.multi[['rocs']]
