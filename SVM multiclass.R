@@ -40,48 +40,6 @@ introduce(dati)
 plot_intro(dati)
 plot_bar(dati)
 
-#c <- cor(data_correlation)
-# corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
-corr <- hetcor(as.data.frame(data_classification))
-ggcorrplot(corr$correlations, outline.col = "white", insig = "pch")
-theme(axis.text.x = element_text(size=10, angle=90, vjust=0.5), axis.text.y = element_text(size=10, vjust=0.5))
-labs(title = paste("Correlation Matrix"))
-
-#corr <- correlate(data_correlation, test=TRUE, corr.method="pearson", p.adjust.method="holm")
-# corrplot(corr,type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
-# cor2(data_correlation)
-
-# library(plyr)
-# 
-# 
-# folds <- split(dati, cut(sample(1:nrow(dati)),10))
-# accuracy <- rep(NA,length(folds))
-# 
-# for(i in 1:length(folds))
-# {
-#   repeat{
-#   test <- ldply(folds[i],data.frame) # convert to data frame
-#   train <- ldply(folds[-i],data.frame) # convert to data frame
-#   test <- test[,-1]
-#   train <- train[,-1]
-#   label_training <- train$target
-#   label_test <- test$target
-#   }
-#   test[["target"]] = factor(test[["target"]])
-#   train[["target"]] = factor(train[["target"]])
-#   svm_model <- svm(target~., data = train,
-#               method = "C-classification",
-#               kernel = "radial",
-#               preProcess = c("center","scale"), #scaling values for svm
-#               gamma = 0.5,
-#               cost = 10)
-#   pred <- predict(svm_model, test )
-#   conf_mat <- confusionMatrix(pred,test$target)
-#   accuracy[i] <- conf_mat$
-# 
-# 
-# 
-# }
 
 
 
@@ -102,16 +60,13 @@ training_set[["target"]] = factor(training_set[["target"]])
 # view dimension of training and test set
 dim(training_set)
 dim(test_set)
-
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
 
 # repeatedcv performs a balanced folds creation
 trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10) #10 fold cross validation 
-
-
-svm_Radial <- svm(target~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , 
+svm_Radial <- svm(target~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type , 
               data = training_set,
               kernel = "radial",
               method = "C-classification",
@@ -120,20 +75,13 @@ svm_Radial <- svm(target~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + al
               cost = 10)
 
 
-
-
-
-
-
 # predict on test set with svm, radial kernel
 predict_radial <- predict(svm_Radial, test_set)
 cm_radial <- confusionMatrix(predict_radial,test_set$target)
 # view statistic on test set
 cm_radial
 
-
 conf <- table(predict_radial, test_set$target)
-
 accuracy <- sum(diag(conf)) / sum(conf)
 # precision is defined as the fraction of correct predictions for a certain class
 precision <- diag(conf) / rowSums(conf)
@@ -142,9 +90,7 @@ recall <- (diag(conf) / colSums(conf))
 # F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
 f1 = 2 * precision * recall / (precision + recall)
 
-
-
-accuracy
+accuracy #is the medium accuracy from 10 fold validation, repeated ten times, 
 precision
 recall
 f1
@@ -155,10 +101,21 @@ f1
 #               trControl=trctrl,
 #               preProcess = c("center", "scale")) #scaling values for svm
 
+
+
+training_set[["target"]] = factor(training_set[["target"]])
+
+# Training phase
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, savePredictions = TRUE)
+set.seed(3233)
+svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
+                    trControl=trctrl,
+                    preProcess = c("center", "scale"),
+                    tuneLength = 10,
+                    metric = "Accuracy")
 # predict on test set with svm, linear
 # predict_linear <- predict(svm_Linear, test_set)
 # cm_linear <- confusionMatrix(predict_linear, test_set$target)
 # cm_linear
-
-
 
