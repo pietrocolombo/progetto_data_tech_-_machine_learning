@@ -1,6 +1,5 @@
 
 
-
 # aggiungiamo le informazioni della strada
 perc_middle <- "type_road_middle.csv"
 dati_middle <- read.csv(perc_middle, header = TRUE, sep =",", quote = "\"", dec = ".")
@@ -10,6 +9,11 @@ dati_middle$aeroway <- as.character(dati_middle$aeroway)
 dati_middle$railway <- as.character(dati_middle$railway)
 dati_middle$sidewalk <- as.character(dati_middle$sidewalk)
 
+print(colSums(is.na(dati_middle)))
+# cond <- (dati_middle$highway == "highway: ''" & dati_middle$aeroway == "aeroway: ''" & dati_middle$railway == "railway: ''" & dati_middle$sidewalk == "sidewalk: ''")
+
+dati_middle$highway[dati_middle$highway == "highway: \"",]
+
 perc_start <- "type_road_start.csv"
 dati_start <- read.csv(perc_start, header = TRUE, sep =",", quote = "\"", dec = ".")
 
@@ -17,6 +21,8 @@ dati_start$highway <- as.character(dati_start$highway)
 dati_start$aeroway <- as.character(dati_start$aeroway)
 dati_start$railway <- as.character(dati_start$railway)
 dati_start$sidewalk <- as.character(dati_start$sidewalk)
+
+print(colSums(is.na(dati_start)))
 
 perc_csv <- "dataset_compresso_info_city.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
@@ -138,6 +144,8 @@ write.csv(dati,file="dataset_compresso_info_city_with_tag.csv" ,row.names=FALSE)
 
 # uniformiamo i tag
 
+n_val_null <- 0
+
 tag <- vector(mode="character", length=nrow(dati))
 for(i_row in 1:nrow(dati))
 {
@@ -165,12 +173,24 @@ for(i_row in 1:nrow(dati))
         }
         else
         {
-          tag[i_row] <- "road"
+          # se non abbiamo informazioni riguardante il tag mettiamo pedestrian
+          # assumiamo che siano persono a camminare nei senieri
+          if(val_tag_way[i_row] == "")
+          {
+            tag[i_row] <- "pedestrian"
+            n_val_null <- n_val_null + 1
+          }
+          else
+          {
+            tag[i_row] <- "road"
+          }
         }
       }
     }
   }
 }
+# valori che non hanno tag che mettiamo a pedestrian
+print(n_val_null)
 
 perc_csv <- "dataset_compresso_info_city.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
