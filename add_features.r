@@ -12,11 +12,16 @@ if(!require(geosphere)){
 # percorso del file che ha generato lo script creazione_dataset.r
 perc_csv <- "dataset_completo.csv"
 
+dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
+
+# valori a null
+print(colSums(is.na(dati)))
+
 # rimuoviamo il file che genera questo script
 file.remove("dataset_with_add_features.csv")
 
-dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
-
+# numero di tuple nel dataset
+print(nrow(dati))
 # cancelliamo righe le quali hanno latitudine >90 0 <-90
 # poichè non hanno senso essendo fuori range
 dati <- dati[dati$Latitude < 90,]
@@ -27,6 +32,8 @@ dati <- dati[dati$Latitude > -90,]
 dati <- dati[dati$Longitude < 180,]
 dati <- dati[dati$Longitude > -180,]
 
+# numero di tuple nel dataset dopo aver tolto le tuple senza consistenza
+print(nrow(dati))
 # creiamo un array di true o false poichè R è più veloce rispetto a valutare le condizioni
 # confrontiamo id_user e id_perc e label se tutti sono uguali alla riga precedente è true
 # è false quando sono diversi cioè indica il cambio di percorso
