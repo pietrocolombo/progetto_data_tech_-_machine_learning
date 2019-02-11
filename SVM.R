@@ -43,19 +43,6 @@ plot_bar(dati)
 
 
 
-# SPLIT DATASET INTO TEST (30%) AND TRAINING (70%)
-
-repeat{
-p <- 0.7
-sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
-training_set <- data_classification[sample, ]
-label_training <- training_set$target
-test_set <- data_classification[-sample, ]
-label_test <- test_set$target
-if(length(levels(label_training)) == 5  &  length(levels(label_test)) == 5 )
-  break
-}
-
 training_set[["target"]] = factor(training_set[["target"]])
 # view dimension of training and test set
 dim(training_set)

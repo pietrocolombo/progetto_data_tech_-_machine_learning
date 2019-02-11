@@ -162,12 +162,29 @@ labs(title = paste("Correlation Matrix"))
 # plot(dati$hcr, dati$vel_avg*3.6, col=dati$target,xlab="HCR heading change rate" , ylab="velocità media" )
 # legend("topright", legend=unique(dati$target),col=1:length(dati$target),pch=1)
 # 
+
+
+
+# SPLIT DATASET INTO TEST (30%) AND TRAINING (70%)
+
+repeat{
+  p <- 0.7
+  sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+  training_set <- data_classification[sample, ]
+  label_training <- training_set$target
+  test_set <- data_classification[-sample, ]
+  label_test <- test_set$target
+  if(length(levels(label_training)) == 5  &  length(levels(label_test)) == 5 )
+    break
+}
+
+
 ## SCATTER PLOTS
 
-bus_car <- data_classification[data_classification$target == "bus" | data_classification$target == "car", ]
-g1<-ggplot(bus_car,aes(x=vcr,y=sr, shape=target, color=target))+
-geom_point(size=3)
-grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+# bus_car <- data_classification[data_classification$target == "bus" | data_classification$target == "car", ]
+# g1<-ggplot(bus_car,aes(x=vcr,y=sr, shape=target, color=target))+
+# geom_point(size=3)
+# grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
 
 
 # scrittura dati all'interno del file csv
