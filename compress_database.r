@@ -9,6 +9,10 @@ dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 # rimuoviamo il file che genera questo script
 file.remove("dataset_with_osm_city.csv")
 
+
+# valori a null
+print(colSums(is.na(dati)))
+
 # soglie per calcolo features
 delta_angolo <- 0.33 # angolo per il change rate in radianti
 vel_tr <- 0.89 # velocità in m/s  
@@ -228,8 +232,8 @@ dati_fin <- data.frame(
   npoints = npoints,
   vel_avg = vel_avg,
   vel_max = vel_max,
-  altitudeAvg = altitudeAvg * 0.3048,
-  altitudeMax = altitudeMax * 0.3048,
+  altitudeAvg = altitudeAvg * 0.3048, # trasformazione da piedi in metri
+  altitudeMax = altitudeMax * 0.3048, # trasformazione da piedi in metri
   vcr = vcr,
   sr = sr,
   hcr = hcr
