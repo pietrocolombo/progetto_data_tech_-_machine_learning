@@ -58,7 +58,6 @@ dati[3617,"cityStart"] <- "Aoluo Qixia Sandao"
 dati <- dati[-c(3726),] #Unfeasible position
 
 
-
 ## PREPROCESSING DATA FOR CLASSIFICATION
 
 # delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
@@ -86,7 +85,33 @@ dati$label <- as.factor(dati$label)
 dati$stateStart <- as.factor(dati$stateStart)
 dati$stateEnd <- as.factor(dati$stateEnd)
 
+
+g1<-ggplot(dati,aes(x=hcr, y=vel_avg*3.6, shape=label, color=label))+
+  geom_point(size=3)
+grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+
+g1<-ggplot(dati,aes(x=distanceTotal/1000, y=time_total/3600, shape=label, color=label))+
+  geom_point(size=3)
+grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+
+# eliminiamo i dati non consistenti dati dai plot sopra
+nrow(dati[dati$label == "walk" & dati$vel_avg > 3.2*3.6,])
+dati <- dati[!(dati$label == "walk" & dati$vel_avg > 3.2*3.6),]
+
 ## data analisys
+
+# plot per vedere i dati che ora sono consistenti
+g1<-ggplot(dati,aes(x=hcr, y=vel_avg, shape=label, color=label))+
+  geom_point(size=3)
+grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+
+g1<-ggplot(dati,aes(x=distanceTotal/1000, y=time_total/3600, shape=label, color=label))+
+  geom_point(size=3)
+grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
+
+g1<-ggplot(dati,aes(x=tag, y=distanceTotal/1000, shape=label, color=label))+
+  geom_point(size=3)
+grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
 
 # introduce(dati)
 # plot_intro(dati)
@@ -126,14 +151,23 @@ labs(title = paste("Correlation Matrix"))
 # cor2(data_correlation)
 
 
+
+# plot(dati$tot_distance/1000, dati$tot_duration/3600, col=dati$label,xlab="distanza in Km" , ylab="tempo in ore" )
+# legend("topright", legend=unique(dati$label),col=1:length(dati$label),pch=1)
+# 
+# plot(data_classification$hcr, data_classification$vel_avg*3.6, col=data_classification$target,xlab="HCR heading change rate" , ylab="velocità media" )
+# legend("topright", legend=unique(data_classification$target),col=1:length(data_classification$target),pch=1)
+# 
+# 
+# plot(dati$hcr, dati$vel_avg*3.6, col=dati$target,xlab="HCR heading change rate" , ylab="velocità media" )
+# legend("topright", legend=unique(dati$target),col=1:length(dati$target),pch=1)
+# 
 ## SCATTER PLOTS
 
 bus_car <- data_classification[data_classification$target == "bus" | data_classification$target == "car", ]
 g1<-ggplot(bus_car,aes(x=vcr,y=sr, shape=target, color=target))+
 geom_point(size=3)
 grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
-
-
 
 
 # scrittura dati all'interno del file csv
