@@ -114,21 +114,10 @@ naive_bayes_model=train(x,
                         preProc = c("BoxCox", "center", "scale", "pca"),
                         method = 'nb',
                         trControl=trctrl)
-                        #tuneLength = 10
-                        #metric = "Kappa")
-#cm_0 <- confusionMatrix(naive_bayes_model)
-#naive_bayes_model = naiveBayes(training_set, training_set$target)
+
 test_pred <- predict(naive_bayes_model, newdata = test_set)
 cm <- confusionMatrix(test_pred, test_set$target)
 conf <- table(test_pred, test_set$target)
-
-n = sum(conf) # number of instances
-nc = nrow(conf) # number of classes
-diag = diag(conf) # number of correctly classified instances per class 
-rowsums = apply(conf, 1, sum) # number of instances per class
-colsums = apply(conf, 2, sum) # number of predictions per class
-p = rowsums / n # distribution of instances over the actual classes
-q = colsums / n # distribution of instances over the predicted classes
 
 accuracy <- sum(diag(conf)) / sum(conf)
 # precision is defined as the fraction of correct predictions for a certain class
@@ -161,7 +150,13 @@ f1 = 2 * precision * recall / (precision + recall)
 
 
 
-
+# n = sum(conf) # number of instances
+# nc = nrow(conf) # number of classes
+# diag = diag(conf) # number of correctly classified instances per class 
+# rowsums = apply(conf, 1, sum) # number of instances per class
+# colsums = apply(conf, 2, sum) # number of predictions per class
+# p = rowsums / n # distribution of instances over the actual classes
+# q = colsums / n # distribution of instances over the predicted classes
 
 
 
@@ -199,9 +194,9 @@ f1 = 2 * precision * recall / (precision + recall)
 #   aucs[type.id] = nbauc
 # }
 
-lines(x=c(0,1), c(0,1))
-
-mean(aucs)
+# lines(x=c(0,1), c(0,1))
+# 
+# mean(aucs)
 
 ## Da usare per ROC
 # library("rpart")
