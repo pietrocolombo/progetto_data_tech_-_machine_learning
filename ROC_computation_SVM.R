@@ -150,6 +150,7 @@ pred_walk <- predict(mod_walk, test_set)
 roc_obj <- roc(test_set$is_walk, pred_walk)
 au_walk = auc(roc_obj)
 print(au_walk)
+x_mean <- c(au_walk)
 
 plot(perf_walk, col= "black")
 par(new=TRUE)
@@ -162,6 +163,7 @@ pred_car <- predict(mod_car, test_set)
 roc_obj <- roc(test_set$is_car, pred_car)
 au_car = auc(roc_obj)
 print(au_car)
+x_mean <- c(au_car, x_mean)
 
 plot(perf_car, col = "red")
 par(new=TRUE)
@@ -174,7 +176,7 @@ pred_bus <- predict(mod_bus, test_set)
 roc_obj <- roc(test_set$is_bus, pred_bus)
 au_bus = auc(roc_obj)
 print(au_bus)
-
+x_mean <- c(au_bus, x_mean)
 
 plot(perf_bus, col = "yellow")
 par(new=TRUE)
@@ -199,6 +201,7 @@ pred_bike <- predict(mod_bike, test_set)
 roc_obj <- roc(test_set$is_bike, pred_bike)
 au_bike = auc(roc_obj)
 print(au_bike)
+x_mean <- c(au_bike, x_mean)
 
 plot(perf_bike, col = "blue")
 par(new=TRUE)
@@ -223,7 +226,7 @@ pred_train <- predict(mod_train, test_set)
 roc_obj <- roc(test_set$is_train, pred_train)
 au_train = auc(roc_obj)
 print(au_train)
-
+x_mean <- c(au_train, x_mean)
 
 plot(perf_train, col = "violet")
 par(new=TRUE)
@@ -231,3 +234,29 @@ abline(0,1, col ="black")
 legend(0.55, 0.5, c("train"), 
        lty=1, col=c("violet"), bty='n', cex=1.0)
 title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_train ))
+
+
+plot(perf_walk, col= "black")
+par(new=TRUE)
+plot(perf_car, col = "red")
+par(new=TRUE)
+plot(perf_bus, col = "yellow")
+par(new=TRUE)
+# plot(perf_airplane, col = "green")
+# par(new=TRUE)
+plot(perf_bike, col = "blue")
+par(new=TRUE)
+# plot(perf_boat, col = "light blue")
+# par(new=TRUE)
+# plot(perf_subway, col = "orange")
+# par(new=TRUE)
+plot(perf_train, col = "violet")
+par(new=TRUE)
+abline(0,1, col ="black")
+
+
+legend(0.55, 0.5, c("walk", "car","bus","bike","train"), 
+       lty=1, col=c("black","red","yellow","blue","violet"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("mean of the area under the curve: ", mean(x_mean) ))
+
+mean(x_mean)
