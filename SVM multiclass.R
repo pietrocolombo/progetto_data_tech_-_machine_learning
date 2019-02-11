@@ -26,9 +26,9 @@ if(!require(e1071)){
   install.packages("e1071")
   library("e1071")
 }
-if(!require()){
-  install.packages("e1071")
-  library("e1071")
+if(!require(caret)){
+  install.packages("caret")
+  library("caret")
 }
 
 
@@ -64,9 +64,9 @@ dati$stateEnd <- as.factor(dati$stateEnd)
 
 ## data analisys
 
-# introduce(dati)
-# plot_intro(dati)
-# plot_bar(dati)
+introduce(dati)
+plot_intro(dati)
+plot_bar(dati)
 
 #normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
 #Creation of the table used for classification phase
@@ -103,6 +103,11 @@ data_correlation <- data.frame(
   target = dati$label
 )
 
+introduce(data_correlation)
+plot_intro(data_correlation)
+plot_bar(data_correlation)
+
+
 
 #c <- cor(data_correlation)
 # corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
@@ -135,78 +140,91 @@ dim(test_set)
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, returnResamp = "all") #10 fold cross validation
 
-svm1 <- svm(target~., data = training_set,
+svm_Radial <- svm(target~., data = training_set,
             method = "C-classification",
             kernal = "radial",
-            preProcess = c("center","scale"),
+            preProcess = c("center","scale"), #scaling values for svm
             trControl=trctrl,
+            metric = "Accuracy",
             gamma = 0.5,
-            cost = 0.8)
+            cost = 10)
 
-predict <- predict(svm1, test_set)
-cm <- confusionMatrix(predict,test_set$target)
-cm
+svm_Linear <- train(target ~., data = data_classification, method = "svmRadial",
+                    #metric = "Accuracy",
+                    trControl=trctrl,
+                    preProcess = c("center", "scale"), #scaling values for svm
+                    tuneLength = 10)
+
+# predict on test set with svm, radial kernel
+predict_radial <- predict(svm_Radial, test_set)
+cm_radial <- confusionMatrix(predict_radial,test_set$target)
+# predict on test set with svm, linear
+predict_linear <- predict(svm_Linear, test_set)
+cm_linear <- confusionMatrix(predict_linear, test_set$target)
+
+
+# view statistic
+cm_radial
+cm_linear
 
 
 
 
-
-
-cor2 = function(df){
-  
-  stopifnot(inherits(df, "data.frame"))
-  stopifnot(sapply(df, class) %in% c("integer"
-                                     , "numeric"
-                                     , "factor"
-                                     , "character"))
-  
-  cor_fun <- function(pos_1, pos_2){
-    
-    # both are numeric
-    if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
-       class(df[[pos_2]]) %in% c("integer", "numeric")){
-      r <- stats::cor(df[[pos_1]]
-                      , df[[pos_2]]
-                      , use = "pairwise.complete.obs"
-      )
-    }
-    
-    # one is numeric and other is a factor/character
-    if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
-       class(df[[pos_2]]) %in% c("factor", "character")){
-      r <- sqrt(
-        summary(
-          stats::lm(df[[pos_1]] ~ as.factor(df[[pos_2]])))[["r.squared"]])
-    }
-    
-    if(class(df[[pos_2]]) %in% c("integer", "numeric") &&
-       class(df[[pos_1]]) %in% c("factor", "character")){
-      r <- sqrt(
-        summary(
-          stats::lm(df[[pos_2]] ~ as.factor(df[[pos_1]])))[["r.squared"]])
-    }
-    
-    # both are factor/character
-    if(class(df[[pos_1]]) %in% c("factor", "character") &&
-       class(df[[pos_2]]) %in% c("factor", "character")){
-      r <- lsr::cramersV(df[[pos_1]], df[[pos_2]], simulate.p.value = TRUE)
-    }
-    
-    return(r)
-  } 
-  
-  cor_fun <- Vectorize(cor_fun)
-  
-  # now compute corr matrix
-  corrmat <- outer(1:ncol(df)
-                   , 1:ncol(df)
-                   , function(x, y) cor_fun(x, y)
-  )
-  
-  rownames(corrmat) <- colnames(df)
-  colnames(corrmat) <- colnames(df)
-  
-  return(corrmat)
-}
+# cor2 = function(df){
+#   
+#   stopifnot(inherits(df, "data.frame"))
+#   stopifnot(sapply(df, class) %in% c("integer"
+#                                      , "numeric"
+#                                      , "factor"
+#                                      , "character"))
+#   
+#   cor_fun <- function(pos_1, pos_2){
+#     
+#     # both are numeric
+#     if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
+#        class(df[[pos_2]]) %in% c("integer", "numeric")){
+#       r <- stats::cor(df[[pos_1]]
+#                       , df[[pos_2]]
+#                       , use = "pairwise.complete.obs"
+#       )
+#     }
+#     
+#     # one is numeric and other is a factor/character
+#     if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
+#        class(df[[pos_2]]) %in% c("factor", "character")){
+#       r <- sqrt(
+#         summary(
+#           stats::lm(df[[pos_1]] ~ as.factor(df[[pos_2]])))[["r.squared"]])
+#     }
+#     
+#     if(class(df[[pos_2]]) %in% c("integer", "numeric") &&
+#        class(df[[pos_1]]) %in% c("factor", "character")){
+#       r <- sqrt(
+#         summary(
+#           stats::lm(df[[pos_2]] ~ as.factor(df[[pos_1]])))[["r.squared"]])
+#     }
+#     
+#     # both are factor/character
+#     if(class(df[[pos_1]]) %in% c("factor", "character") &&
+#        class(df[[pos_2]]) %in% c("factor", "character")){
+#       r <- lsr::cramersV(df[[pos_1]], df[[pos_2]], simulate.p.value = TRUE)
+#     }
+#     
+#     return(r)
+#   } 
+#   
+#   cor_fun <- Vectorize(cor_fun)
+#   
+#   # now compute corr matrix
+#   corrmat <- outer(1:ncol(df)
+#                    , 1:ncol(df)
+#                    , function(x, y) cor_fun(x, y)
+#   )
+#   
+#   rownames(corrmat) <- colnames(df)
+#   colnames(corrmat) <- colnames(df)
+#   
+#   return(corrmat)
+# }

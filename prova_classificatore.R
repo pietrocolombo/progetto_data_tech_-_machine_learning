@@ -162,17 +162,19 @@ training_set[["target"]] = factor(training_set[["target"]])
 
 # Training phase
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, savePredictions = TRUE)
 set.seed(3233)
 
 svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
                     trControl=trctrl,
                     preProcess = c("center", "scale"),
-                    tuneLength = 10)
+                    tuneLength = 10,
+                    metric = "Accuracy")
 
 
 
 # Test phase
+print(svm_Linear)
 test_pred <- predict(svm_Linear, newdata = test_set)
 test_pred
 cm <- confusionMatrix(test_pred,test_set$target)

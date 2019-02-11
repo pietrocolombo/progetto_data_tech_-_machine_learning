@@ -7,7 +7,7 @@ library(tree)
 library(UsingR)
 library(rattle)
 library(ggplot2)
-perc_csv <- "data_classification.csv"
+perc_csv <- "data_classification"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 repeat{
@@ -29,8 +29,8 @@ repeat{
   if(length(levels(label_training)) == 8)
     break
 }
-
-h.tree<-tree(target~vcr+sr+hcr+vel_max+vel_avg+altitude_max+altitude_avg+tot_duration+tot_distance+state_changed,training_set)
+training_set[,target] = lapply(training_set[,target], as.factor)
+h.tree<-tree(target ~ vcr+sr+hcr+vel_max+vel_avg+altitude_max+altitude_avg+tot_duration+tot_distance+state_changed+type,training_set)
 summary(h.tree)
 
 plot(h.tree,lwd=3)
@@ -38,6 +38,7 @@ text(h.tree,pretty=0,cex=1.2,col="blue")
 
 variables = c("walk", "bus", "car", "subway", "airplane", "boat", "bike", "train")
 formula = reformulate(variables, response = 'target')
+
 
 model_tree = rpart::rpart(target~vcr+sr+hcr+vel_max+vel_avg+altitude_max+altitude_avg+tot_duration+tot_distance+state_changed, data=training_set, method="class")
 rattle::fancyRpartPlot(model_tree)
