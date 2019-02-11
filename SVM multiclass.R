@@ -42,7 +42,7 @@ plot_bar(dati)
 
 #c <- cor(data_correlation)
 # corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
-corr <- hetcor(as.data.frame(data_correlation))
+corr <- hetcor(as.data.frame(data_classification))
 ggcorrplot(corr$correlations, outline.col = "white", insig = "pch")
 theme(axis.text.x = element_text(size=10, angle=90, vjust=0.5), axis.text.y = element_text(size=10, vjust=0.5))
 labs(title = paste("Correlation Matrix"))
@@ -111,19 +111,21 @@ anyNA(data_classification)
 trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10) #10 fold cross validation
 
 
-svm_Radial <- train(target~., data = training_set,
+svm_Radial <- svm(target~., data = training_set,
+              kernel = "radial",
               method = "C-classification",
-              kernal = "radial",
               preProcess = c("center","scale"), #scaling values for svm
               trControl=trctrl,
               gamma = 0.5,
               cost = 10)
 
 svm_Linear <- train(target ~., data = data_classification, 
-              method = "svmRadial",
+              method = "svmLinear",
               trControl=trctrl,
-              preProcess = c("center", "scale"), #scaling values for svm
-              tuneLength = 10)
+              preProcess = c("center", "scale")) #scaling values for svm
+
+
+
 
 
 

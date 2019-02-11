@@ -87,6 +87,7 @@ data_classification <- data.frame(
   tot_duration = dati$time_total,
   tot_distance = dati$distanceTotal,
   state_changed = dati$state_changed,
+  type = dati$tag,
   target = dati$label
 )
 # 
