@@ -114,21 +114,10 @@ naive_bayes_model=train(x,
                         preProc = c("BoxCox", "center", "scale", "pca"),
                         method = 'nb',
                         trControl=trctrl)
-                        #tuneLength = 10
-                        #metric = "Kappa")
-#cm_0 <- confusionMatrix(naive_bayes_model)
-#naive_bayes_model = naiveBayes(training_set, training_set$target)
+
 test_pred <- predict(naive_bayes_model, newdata = test_set)
 cm <- confusionMatrix(test_pred, test_set$target)
 conf <- table(test_pred, test_set$target)
-
-n = sum(conf) # number of instances
-nc = nrow(conf) # number of classes
-diag = diag(conf) # number of correctly classified instances per class 
-rowsums = apply(conf, 1, sum) # number of instances per class
-colsums = apply(conf, 2, sum) # number of predictions per class
-p = rowsums / n # distribution of instances over the actual classes
-q = colsums / n # distribution of instances over the predicted classes
 
 accuracy <- sum(diag(conf)) / sum(conf)
 # precision is defined as the fraction of correct predictions for a certain class
@@ -138,33 +127,76 @@ recall <- (diag(conf) / colSums(conf))
 # F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
 f1 = 2 * precision * recall / (precision + recall)
 
-aucs = c()
-plot(x=NA, y=NA, xlim=c(0,1), ylim=c(0,1),
-     ylab='True Positive Rate',
-     xlab='False Positive Rate',
-     bty='n')
-nbmodel = NaiveBayes(type ~ ., data=training_set[, 12])
-nbprediction=predict(nbmodel, newdata = test_set, type = "raw")
-score = nbprediction$posterior[, 'TRUE']
-lvls = levels(data_classification$target)
-for (target.id in 1:8) {
-  t =  as.factor(training_set$target == lvls[target.id])
-  actual.class = test_set$target == lvls[target.id]
-  pred = prediction(score, actual.class)
-  nbperf = performance(pred, "tpr", "fpr")
-  roc.x = unlist(nbperf@x.values)
-  roc.y = unlist(nbperf@y.values)
-  lines(roc.y ~ roc.x, col=type.id+1, lwd=2)
-  
-  nbauc = performance(pred, "auc")
-  nbauc = unlist(slot(nbauc, "y.values"))
-  aucs[type.id] = nbauc
-  
-}
 
-lines(x=c(0,1), c(0,1))
 
-mean(aucs)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# n = sum(conf) # number of instances
+# nc = nrow(conf) # number of classes
+# diag = diag(conf) # number of correctly classified instances per class 
+# rowsums = apply(conf, 1, sum) # number of instances per class
+# colsums = apply(conf, 2, sum) # number of predictions per class
+# p = rowsums / n # distribution of instances over the actual classes
+# q = colsums / n # distribution of instances over the predicted classes
+
+
+
+
+# 
+# spec_by_class = cm$byClass
+# 
+# aucs = c()
+# plot(x=NA, y=NA, xlim=c(0,1), ylim=c(0,1),
+#      ylab='True Positive Rate',
+#      xlab='False Positive Rate',
+#      bty='n')
+# 
+# 
+# lines(roc.y ~ roc.x, col=type.id+1, lwd=2)
+# library(ROCR)
+# library(klaR)
+
+
+# nbmodel = NaiveBayes(type ~ ., data=training_set[, 12])
+# nbprediction=predict(nbmodel, newdata = test_set, type = "raw")
+# score = nbprediction$posterior[, 'TRUE']
+# lvls = levels(data_classification$target)
+# for (target.id in 1:8) {
+#   t =  as.factor(training_set$target == lvls[target.id])
+#   actual.class = test_set$target == lvls[target.id]
+#   pred = prediction(score, actual.class)
+#   nbperf = performance(pred, "tpr", "fpr")
+#   roc.x = unlist(nbperf@x.values)
+#   roc.y = unlist(nbperf@y.values)
+  
+  
+#   nbauc = performance(pred, "auc")
+#   nbauc = unlist(slot(nbauc, "y.values"))
+#   aucs[type.id] = nbauc
+# }
+
+# lines(x=c(0,1), c(0,1))
+# 
+# mean(aucs)
 
 ## Da usare per ROC
 # library("rpart")
