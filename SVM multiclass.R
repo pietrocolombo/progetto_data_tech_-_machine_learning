@@ -115,7 +115,21 @@ svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
                     tuneLength = 10,
                     metric = "Accuracy")
 # predict on test set with svm, linear
-# predict_linear <- predict(svm_Linear, test_set)
-# cm_linear <- confusionMatrix(predict_linear, test_set$target)
-# cm_linear
+predict_linear <- predict(svm_Linear, test_set)
+cm_linear <- confusionMatrix(predict_linear, test_set$target)
+cm_linear
 
+
+conf_lin <- table(predict_linear, test_set$target)
+accuracy_lin <- sum(diag(conf_lin)) / sum(conf_lin)
+# precision is defined as the fraction of correct predictions for a certain class
+precision_lin <- diag(conf_lin) / rowSums(conf_lin)
+# recall is the fraction of instances of a class that were correctly predicted
+recall_lin <- (diag(conf_lin) / colSums(conf_lin))
+# F-1 score is defined as the harmonic mean (or a weighted average) of precision and recall
+f1_lin = 2 * precision_lin * recall_lin / (precision_lin + recall_lin)
+
+accuracy_lin #is the medium accuracy from 10 fold validation, repeated ten times, 
+precision_lin
+recall_lin
+f1_lin

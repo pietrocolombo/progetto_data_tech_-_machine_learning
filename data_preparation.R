@@ -109,10 +109,6 @@ data_classification <- data.frame(
   target = dati$label
 )
 
-bus_car <- data_classification[data_classification$target == "bus" | data_classification$target == "car", ]
-g1<-ggplot(bus_car,aes(x=vcr,y=sr, shape=target, color=target))+
-geom_point(size=3)
-grid.arrange(g1,nrow=1,ncol=1,  top = "Scatter plots")
 
 
 
