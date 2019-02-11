@@ -3,6 +3,11 @@ if(!require(pROC)){
   install.packages("pROC")
   library("pROC")
 }
+if(!require(ROCR)){
+  install.packages("ROCR")
+  library("ROCR")
+}
+
 
 #Binarization of the classes
 
@@ -96,7 +101,6 @@ mod_train = svm(is_train ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + 
                 cost = 5)
 
 
-library(ROCR)
 pred_walk <- prediction(predict(mod_walk, test_set), test_set$is_walk)
 pred_car <- prediction(predict(mod_car, test_set), test_set$is_car)
 pred_bus <- prediction(predict(mod_bus, test_set), test_set$is_bus)
@@ -137,9 +141,15 @@ par(new=TRUE)
 abline(0,1, col ="black")
 
 
+<<<<<<< HEAD:ROC_computation.R
 legend(0.55, 0.5, c("walk", "car","bus","bike","train"), 
       lty=1, col=c("black","red","yellow","blue","violet"), bty='n', cex=1.0)
 
+=======
+legend(0.55, 0.5, c("walk", "car","bus","airplane","bike","boat","subway","train"), 
+      lty=1, col=c("black","red","yellow","green","blue","light blue","orange","violet"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM")
+>>>>>>> 42a4d4fa9b1c9078287b553a154a990096366be5:ROC_computation_SVM.R
 
 #AUC evaluation for each class 
 pred_walk <- predict(mod_walk, test_set)
@@ -147,26 +157,85 @@ roc_obj <- roc(test_set$is_walk, pred_walk)
 au_walk = auc(roc_obj)
 print(au_walk)
 
+plot(perf_walk, col= "black")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("walk"), 
+       lty=1, col=c("black"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_walk ))
+
 pred_car <- predict(mod_car, test_set)
 roc_obj <- roc(test_set$is_car, pred_car)
 au_car = auc(roc_obj)
 print(au_car)
+
+plot(perf_car, col = "red")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("car"), 
+       lty=1, col=c("red"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_car ))
 
 pred_bus <- predict(mod_bus, test_set)
 roc_obj <- roc(test_set$is_bus, pred_bus)
 au_bus = auc(roc_obj)
 print(au_bus)
 
+<<<<<<< HEAD:ROC_computation.R
+=======
+plot(perf_bus, col = "yellow")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("bus"), 
+       lty=1, col=c("yellow"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_bus ))
+
+pred_airplane <- predict(mod_airplane, test_set)
+roc_obj <- roc(test_set$is_airplane, pred_airplane)
+au_airplane = auc(roc_obj)
+print(au_airplane)
+
+plot(perf_airplane, col = "green")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("airplane"), 
+       lty=1, col=c("green"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_airplane ))
+
+>>>>>>> 42a4d4fa9b1c9078287b553a154a990096366be5:ROC_computation_SVM.R
 pred_bike <- predict(mod_bike, test_set)
 roc_obj <- roc(test_set$is_bike, pred_bike)
 au_bike = auc(roc_obj)
 print(au_bike)
 
+<<<<<<< HEAD:ROC_computation.R
+=======
+plot(perf_bike, col = "blue")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("bike"), 
+       lty=1, col=c("blue"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_bike ))
+
+pred_subway <- predict(mod_subway, test_set)
+roc_obj <- roc(test_set$is_subway, pred_subway)
+au_subway = auc(roc_obj)
+print(au_subway)
+
+plot(perf_subway, col = "orange")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("subway"), 
+       lty=1, col=c("orange"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_subway ))
+
+>>>>>>> 42a4d4fa9b1c9078287b553a154a990096366be5:ROC_computation_SVM.R
 pred_train <- predict(mod_train, test_set)
 roc_obj <- roc(test_set$is_train, pred_train)
 au_train = auc(roc_obj)
 print(au_train)
 
+<<<<<<< HEAD:ROC_computation.R
 # pred_airplane <- predict(mod_airplane, test_set)
 # roc_obj <- roc(test_set$is_airplane, pred_airplane)
 # au_airplane = auc(roc_obj)
@@ -176,3 +245,11 @@ print(au_train)
 # roc_obj <- roc(test_set$is_subway, pred_subway)
 # au_subway = auc(roc_obj)
 # print(au_subway)
+=======
+plot(perf_train, col = "violet")
+par(new=TRUE)
+abline(0,1, col ="black")
+legend(0.55, 0.5, c("train"), 
+       lty=1, col=c("violet"), bty='n', cex=1.0)
+title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_train ))
+>>>>>>> 42a4d4fa9b1c9078287b553a154a990096366be5:ROC_computation_SVM.R
