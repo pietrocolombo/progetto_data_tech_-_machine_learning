@@ -1,14 +1,10 @@
 # merge osm for easy query with ira_open_street_map
 
-#if(!require(readtext)){
-  #install.packages("readtext")
-  #library("readtext")
-#}
-
 # percorso della cartella
-dirs_perc = list.dirs("../osm_n")
+dirs_perc = list.dirs("../osm_s")
 # lista contenente i nomi dei file
 file = list.files(dirs_perc)
+file <- file[file!="Icon\r"]
 # percorso dei file
 path <- paste(dirs_perc[1], file[1], sep = "/")
 
@@ -54,4 +50,4 @@ for (i in 2:length(file))
 
 final_list[i+1] <- lines[length(lines)]
 # scrivo nel file mappa.osm l'unione di tutti i file
-lapply(final_list, write, "mappa.osm", append=TRUE, ncolumns=1000)
+lapply(final_list, write, "mappa_S.osm", append=TRUE, ncolumns=1000)
