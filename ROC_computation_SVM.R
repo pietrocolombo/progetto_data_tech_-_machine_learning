@@ -7,6 +7,10 @@ if(!require(ROCR)){
   install.packages("ROCR")
   library("ROCR")
 }
+if(!require(e1071)){
+  install.packages("e1071")
+  library("e1071")
+}
 
 
 #Binarization of the classes
@@ -20,11 +24,11 @@ test_set$is_car <- as.numeric(test_set$target == 'car')
 training_set$is_bus <- as.numeric(training_set$target == 'bus')
 test_set$is_bus <- as.numeric(test_set$target == 'bus')
 
-# training_set$is_airplane <- as.numeric(training_set$target == 'airplane')
-# test_set$is_airplane <- as.numeric(test_set$target == 'airplane')
-
 training_set$is_bike <- as.numeric(training_set$target == 'bike')
 test_set$is_bike <- as.numeric(test_set$target == 'bike')
+
+training_set$is_train <- as.numeric(training_set$target == 'train')
+test_set$is_train <- as.numeric(test_set$target == 'train')
 
 # training_set$is_boat<- as.numeric(training_set$target == 'boat')
 # test_set$is_boat <- as.numeric(test_set$target == 'boat')
@@ -32,17 +36,17 @@ test_set$is_bike <- as.numeric(test_set$target == 'bike')
 # training_set$is_subway <- as.numeric(training_set$target == 'subway')
 # test_set$is_subway <- as.numeric(test_set$target == 'subway')
 
-training_set$is_train <- as.numeric(training_set$target == 'train')
-test_set$is_train <- as.numeric(test_set$target == 'train')
+# training_set$is_airplane <- as.numeric(training_set$target == 'airplane')
+# test_set$is_airplane <- as.numeric(test_set$target == 'airplane')
 
 
-library(e1071)
 
 
 ################### SVM RADIAL KERNEL ROC EVALUATION FOR EACH CLASS#############################
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
 
 # Evaluating models for each class
-mod_walk = svm(is_walk ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
+mod_walk = svm(is_walk ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type , data=training_set,
                method = "C-classification",
                kernal = "radial",
                preProcess = c("center","scale"), #scaling values for svm
@@ -50,7 +54,7 @@ mod_walk = svm(is_walk ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + al
                gamma = 0.5,
                cost = 5)
 
-mod_car = svm(is_car ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
+mod_car = svm(is_car ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type, data=training_set,
               method = "C-classification",
               kernal = "radial",
               preProcess = c("center","scale"), #scaling values for svm
@@ -74,7 +78,7 @@ mod_bus = svm(is_bus ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + alti
 #                    gamma = 0.5,
 #                    cost = 5)
 
-mod_bike = svm(is_bike ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type, data=training_set,
+mod_bike = svm(is_bike ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type, data=training_set,
                method = "C-classification",
                kernal = "radial",
                preProcess = c("center","scale"), #scaling values for svm
@@ -92,7 +96,7 @@ mod_bike = svm(is_bike ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + al
 
 
 
-mod_train = svm(is_train ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type, data=training_set, 
+mod_train = svm(is_train ~  vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type, data=training_set, 
                 method = "C-classification",
                 kernal = "radial",
                 preProcess = c("center","scale"), #scaling values for svm
@@ -231,3 +235,4 @@ abline(0,1, col ="black")
 legend(0.55, 0.5, c("train"), 
        lty=1, col=c("violet"), bty='n', cex=1.0)
 title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_train ))
+

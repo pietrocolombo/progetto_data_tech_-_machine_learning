@@ -7,104 +7,67 @@ if(!require(ROCR)){
   install.packages("ROCR")
   library("ROCR")
 }
+if(!require(caret)){
+  install.packages("caret")
+  library("caret")
+}
 
 
 #Binarization of the classes
 
 training_set$is_walk <- as.numeric(training_set$target == 'walk')
 test_set$is_walk <- as.numeric(test_set$target == 'walk')
-
 training_set$is_car <- as.numeric(training_set$target == 'car')
 test_set$is_car <- as.numeric(test_set$target == 'car')
 
 training_set$is_bus <- as.numeric(training_set$target == 'bus')
 test_set$is_bus <- as.numeric(test_set$target == 'bus')
 
-training_set$is_airplane <- as.numeric(training_set$target == 'airplane')
-test_set$is_airplane <- as.numeric(test_set$target == 'airplane')
-
 training_set$is_bike <- as.numeric(training_set$target == 'bike')
 test_set$is_bike <- as.numeric(test_set$target == 'bike')
-
-training_set$is_boat<- as.numeric(training_set$target == 'boat')
-test_set$is_boat <- as.numeric(test_set$target == 'boat')
-
-training_set$is_subway <- as.numeric(training_set$target == 'subway')
-test_set$is_subway <- as.numeric(test_set$target == 'subway')
 
 training_set$is_train <- as.numeric(training_set$target == 'train')
 test_set$is_train <- as.numeric(test_set$target == 'train')
 
+training_set$is_walk <- as.factor(training_set$is_walk)
+training_set$is_car <- as.factor(training_set$is_car)
+training_set$is_bus <- as.factor(training_set$is_bus)
+training_set$is_train <- as.factor(training_set$is_train)
+training_set$is_bike <- as.factor(training_set$is_bike)
 
-library(e1071)
+################### NAIVE BAYES ROC EVALUATION FOR EACH CLASS #############################
 
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
+# Evaluating ROC for each class
+mod_walk = train(is_walk ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
+                 data = training_set,
+                 preProcess= c("center","scale"),
+                 method = 'nb',
+                 trControl=trctrl)
 
-################### SVM RADIAL KERNEL ROC EVALUATION FOR EACH CLASS#############################
+mod_car = train(is_car ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
+                data = training_set,
+                preProcess= c("center","scale"),
+                method = 'nb',
+                trControl=trctrl)
 
-# Evaluating models for each class
-mod_walk = svm(is_walk ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
-               method = "C-classification",
-               kernal = "radial",
-               preProcess = c("center","scale"), #scaling values for svm
-               trControl=trctrl,
-               gamma = 0.5,
-               cost = 5)
+mod_bus = train(is_bus ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
+                data = training_set,
+                preProcess= c("center","scale"),
+                method = 'nb',
+                trControl=trctrl)
 
-mod_car = svm(is_car ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
-              method = "C-classification",
-              kernal = "radial",
-              preProcess = c("center","scale"), #scaling values for svm
-              trControl=trctrl,
-              gamma = 0.5,
-              cost = 5)
+mod_bike = train(is_bike ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
+                 data = training_set,
+                 preProcess= c("center","scale"),
+                 method = 'nb',
+                 trControl=trctrl)
 
-mod_bus = svm(is_bus ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
-              method = "C-classification",
-              kernal = "radial",
-              preProcess = c("center","scale"), #scaling values for svm
-              trControl=trctrl,
-              gamma = 0.5,
-              cost = 5)
-
-mod_airplane = svm(is_airplane ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set, 
-                   method = "C-classification",
-                   kernal = "radial",
-                   preProcess = c("center","scale"), #scaling values for svm
-                   trControl=trctrl,
-                   gamma = 0.5,
-                   cost = 5)
-
-mod_bike = svm(is_bike ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set,
-               method = "C-classification",
-               kernal = "radial",
-               preProcess = c("center","scale"), #scaling values for svm
-               trControl=trctrl,
-               gamma = 0.5,
-               cost = 5)
-
-mod_boat = svm(is_boat ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set, 
-                 method = "C-classification",
-                 kernal = "radial",
-                 preProcess = c("center","scale"), #scaling values for svm
-                 trControl=trctrl,
-                 gamma = 0.5,
-                 cost = 5)
-
-mod_subway = svm(is_subway ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set, 
-                 method = "C-classification",
-                 kernal = "radial",
-                 preProcess = c("center","scale"), #scaling values for svm
-                 trControl=trctrl,
-                 gamma = 0.5,
-                 cost = 5)
-
-mod_train = svm(is_train ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type , data=training_set, 
-                method = "C-classification",
-                kernal = "radial",
-                preProcess = c("center","scale"), #scaling values for svm
-                trControl=trctrl,
-                gamma = 0.5,
-                cost = 5)
+mod_train = train(is_train ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
+                  data = training_set,
+                  preProcess= c("center","scale"),
+                  method = 'nb',
+                  trControl=trctrl)
 
 
 pred_walk <- prediction(predict(mod_walk, test_set), test_set$is_walk)
@@ -174,7 +137,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("car"), 
        lty=1, col=c("red"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_car ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_car ))
 
 pred_bus <- predict(mod_bus, test_set)
 roc_obj <- roc(test_set$is_bus, pred_bus)
@@ -186,7 +149,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("bus"), 
        lty=1, col=c("yellow"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_bus ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_bus ))
 
 pred_airplane <- predict(mod_airplane, test_set)
 roc_obj <- roc(test_set$is_airplane, pred_airplane)
@@ -198,7 +161,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("airplane"), 
        lty=1, col=c("green"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_airplane ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_airplane ))
 
 pred_bike <- predict(mod_bike, test_set)
 roc_obj <- roc(test_set$is_bike, pred_bike)
@@ -210,7 +173,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("bike"), 
        lty=1, col=c("blue"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_bike ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_bike ))
 
 pred_subway <- predict(mod_subway, test_set)
 roc_obj <- roc(test_set$is_subway, pred_subway)
@@ -222,7 +185,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("subway"), 
        lty=1, col=c("orange"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_subway ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_subway ))
 
 pred_train <- predict(mod_train, test_set)
 roc_obj <- roc(test_set$is_train, pred_train)
@@ -234,7 +197,7 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("train"), 
        lty=1, col=c("violet"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_train ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_train ))
 
 
 pred_boat <- predict(mod_boat, test_set)
@@ -247,4 +210,4 @@ par(new=TRUE)
 abline(0,1, col ="black")
 legend(0.55, 0.5, c("boat"), 
        lty=1, col=c("light blue"), bty='n', cex=1.0)
-title(main = "ROC Curve SVM", sub = paste0("Area under the curve: ", au_boat ))
+title(main = "ROC Curve BAYES", sub = paste0("Area under the curve: ", au_boat ))
