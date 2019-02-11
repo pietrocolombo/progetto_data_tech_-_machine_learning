@@ -33,81 +33,12 @@ if(!require(caret)){
 
 
 
-
-
-perc_csv <- "dataset_compresso_info_city_simple_tag.csv"
+perc_csv <- "dataset_final.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
-
-# delete of all the journey with altitude equals to nan (percentage of value -777 within it > threshold)
-dati <- dati[!(is.na(dati$altitudeAvg)), ]
-
-## PREPROCESSING DATA 
-
-# conversion from factor to character of label attribute
-dati$label <- as.character(dati$label)
-# anytime there is a "taxi" label replace it with "car"
-dati$label[dati$label == "taxi"] <- "car"
-#rename the rows with label "run" with "walk"
-dati$label[dati$label == "run"] <- "walk"
-
-dati$stateStart <- as.character(dati$stateStart)
-dati$stateEnd <- as.character(dati$stateEnd)
-# Creation of a new boolean attribute that we'll use to train classifier
-dati$state_changed <- dati$stateStart != dati$stateEnd
-
-dati$label[dati$label == "taxi"] <- "car"
-
-# reconvert from character to factor
-dati$label <- as.factor(dati$label)
-dati$stateStart <- as.factor(dati$stateStart)
-dati$stateEnd <- as.factor(dati$stateEnd)
-
-## data analisys
 
 introduce(dati)
 plot_intro(dati)
 plot_bar(dati)
-
-#normalize(dati, method = "standardize", range = c(0, 1), margin = 1L, on.constant = "quiet")
-#Creation of the table used for classification phase
-
-data_classification <- data.frame(
-  vcr = dati$vcr,
-  sr = dati$sr,
-  hcr = dati$hcr,
-  vel_max = dati$vel_max,
-  vel_avg = dati$vel_avg,
-  altitude_max = dati$altitudeMax,
-  altitude_avg = dati$altitudeAvg,
-  tot_duration = dati$time_total,
-  tot_distance = dati$distanceTotal,
-  state_changed = dati$state_changed,
-  type = dati$tag,
-  target = dati$label
-)
-
-
-## CORRELATION MATRIX EVALUATION
-data_correlation <- data.frame(
-  vcr = dati$vcr,
-  sr = dati$sr,
-  hcr = dati$hcr,
-  vel_max = dati$vel_max,
-  vel_avg = dati$vel_avg,
-  altitude_max = dati$altitudeMax,
-  altitude_avg = dati$altitudeAvg,
-  tot_duration = dati$time_total,
-  tot_distance = dati$distanceTotal,
-  type = dati$tag,
-  state_changed = dati$state_changed,
-  target = dati$label
-)
-
-introduce(data_correlation)
-plot_intro(data_correlation)
-plot_bar(data_correlation)
-
-
 
 #c <- cor(data_correlation)
 # corrplot(c, type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
@@ -120,13 +51,48 @@ labs(title = paste("Correlation Matrix"))
 # corrplot(corr,type = "upper",order = "hclust", tl.col = "black", tl.srt = 45)
 # cor2(data_correlation)
 
+# library(plyr)
+# 
+# 
+# folds <- split(dati, cut(sample(1:nrow(dati)),10))
+# accuracy <- rep(NA,length(folds))
+# 
+# for(i in 1:length(folds))
+# {
+#   repeat{
+#   test <- ldply(folds[i],data.frame) # convert to data frame
+#   train <- ldply(folds[-i],data.frame) # convert to data frame
+#   test <- test[,-1]
+#   train <- train[,-1]
+#   label_training <- train$target
+#   label_test <- test$target
+#   }
+#   test[["target"]] = factor(test[["target"]])
+#   train[["target"]] = factor(train[["target"]])
+#   svm_model <- svm(target~., data = train,
+#               method = "C-classification",
+#               kernel = "radial",
+#               preProcess = c("center","scale"), #scaling values for svm
+#               gamma = 0.5,
+#               cost = 10)
+#   pred <- predict(svm_model, test )
+#   conf_mat <- confusionMatrix(pred,test$target)
+#   accuracy[i] <- conf_mat$
+# 
+# 
+# 
+# }
+
+
+
+# SPLIT DATASET INTO TEST (20%) AND TRAINING (80%)
 
 repeat{
 p <- 0.7
-sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
-training_set <- data_classification[sample, ]
+sample <- sample.int(n = nrow(dati), size = floor(p * nrow(dati)), replace = FALSE)
+training_set <- dati[sample, ]
 label_training <- training_set$target
-test_set <- data_classification[-sample, ]
+test_set <- dati[-sample, ]
 label_test <- test_set$target
 if(length(levels(label_training)) == 8  &&  length(levels(label_test)) == 8 )
   break
@@ -140,22 +106,28 @@ dim(test_set)
 # any null value in data_classification? if it's FALSE it's good ;)
 anyNA(data_classification)
 
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, returnResamp = "all") #10 fold cross validation
 
-svm_Radial <- svm(target~., data = training_set,
-            method = "C-classification",
-            kernal = "radial",
-            preProcess = c("center","scale"), #scaling values for svm
-            trControl=trctrl,
-            metric = "Accuracy",
-            gamma = 0.5,
-            cost = 10)
+# repeatedcv performs a balanced folds creation repeated for ten times
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10) #10 fold cross validation
 
-svm_Linear <- train(target ~., data = data_classification, method = "svmRadial",
-                    #metric = "Accuracy",
-                    trControl=trctrl,
-                    preProcess = c("center", "scale"), #scaling values for svm
-                    tuneLength = 10)
+
+svm_Radial <- train(target~., data = training_set,
+              method = "C-classification",
+              kernal = "radial",
+              preProcess = c("center","scale"), #scaling values for svm
+              trControl=trctrl,
+              gamma = 0.5,
+              cost = 10)
+
+svm_Linear <- train(target ~., data = data_classification, 
+              method = "svmRadial",
+              trControl=trctrl,
+              preProcess = c("center", "scale"), #scaling values for svm
+              tuneLength = 10)
+
+
+
+
 
 # predict on test set with svm, radial kernel
 predict_radial <- predict(svm_Radial, test_set)
@@ -165,66 +137,11 @@ predict_linear <- predict(svm_Linear, test_set)
 cm_linear <- confusionMatrix(predict_linear, test_set$target)
 
 
-# view statistic
+# view statistic on test set
 cm_radial
 cm_linear
 
 
 
 
-# cor2 = function(df){
-#   
-#   stopifnot(inherits(df, "data.frame"))
-#   stopifnot(sapply(df, class) %in% c("integer"
-#                                      , "numeric"
-#                                      , "factor"
-#                                      , "character"))
-#   
-#   cor_fun <- function(pos_1, pos_2){
-#     
-#     # both are numeric
-#     if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
-#        class(df[[pos_2]]) %in% c("integer", "numeric")){
-#       r <- stats::cor(df[[pos_1]]
-#                       , df[[pos_2]]
-#                       , use = "pairwise.complete.obs"
-#       )
-#     }
-#     
-#     # one is numeric and other is a factor/character
-#     if(class(df[[pos_1]]) %in% c("integer", "numeric") &&
-#        class(df[[pos_2]]) %in% c("factor", "character")){
-#       r <- sqrt(
-#         summary(
-#           stats::lm(df[[pos_1]] ~ as.factor(df[[pos_2]])))[["r.squared"]])
-#     }
-#     
-#     if(class(df[[pos_2]]) %in% c("integer", "numeric") &&
-#        class(df[[pos_1]]) %in% c("factor", "character")){
-#       r <- sqrt(
-#         summary(
-#           stats::lm(df[[pos_2]] ~ as.factor(df[[pos_1]])))[["r.squared"]])
-#     }
-#     
-#     # both are factor/character
-#     if(class(df[[pos_1]]) %in% c("factor", "character") &&
-#        class(df[[pos_2]]) %in% c("factor", "character")){
-#       r <- lsr::cramersV(df[[pos_1]], df[[pos_2]], simulate.p.value = TRUE)
-#     }
-#     
-#     return(r)
-#   } 
-#   
-#   cor_fun <- Vectorize(cor_fun)
-#   
-#   # now compute corr matrix
-#   corrmat <- outer(1:ncol(df)
-#                    , 1:ncol(df)
-#                    , function(x, y) cor_fun(x, y)
-#   )
-#   
-#   rownames(corrmat) <- colnames(df)
-#   colnames(corrmat) <- colnames(df)
-#   
-#   return(corrmat)
-# }
+
