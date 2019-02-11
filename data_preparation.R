@@ -49,13 +49,19 @@ dati = dati[!(is.na(dati$altitudeAvg)), ]
 
 ## PREPROCESSING DATA 
 
+# delete of all the journey labelled as BOAT and AIRPLANE classes because we do not have so much istances within the dataset
+dati = dati[(dati$label != "airplane"), ]
+dati = dati[(dati$label != "boat"), ]
+
+
 # conversion from factor to character of label attribute
 dati$label <- as.character(dati$label)
 # anytime there is a "taxi" label replace it with "car"
 dati$label[dati$label == "taxi"] <- "car"
 #rename the rows with label "run" with "walk"
 dati$label[dati$label == "run"] <- "walk"
-
+#rename subway to train (explanation in the documentation)
+dati$label[dati$label == "subway"] <- "train"
 dati$stateStart <- as.character(dati$stateStart)
 dati$stateEnd <- as.character(dati$stateEnd)
 # Creation of a new boolean attribute that we'll use to train classifier
