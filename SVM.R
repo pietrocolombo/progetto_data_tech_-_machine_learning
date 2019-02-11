@@ -47,10 +47,10 @@ plot_bar(dati)
 
 repeat{
 p <- 0.7
-sample <- sample.int(n = nrow(dati), size = floor(p * nrow(dati)), replace = FALSE)
-training_set <- dati[sample, ]
+sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+training_set <- data_classification[sample, ]
 label_training <- training_set$target
-test_set <- dati[-sample, ]
+test_set <- data_classification[-sample, ]
 label_test <- test_set$target
 if(length(levels(label_training)) == 5  &  length(levels(label_test)) == 5 )
   break
@@ -109,7 +109,9 @@ training_set[["target"]] = factor(training_set[["target"]])
 
 trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, savePredictions = TRUE)
 set.seed(3233)
-svm_Linear <- train(target ~., data = training_set, method = "svmLinear",
+svm_Linear <- train(target ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration +
+                    tot_distance + state_changed + city_changed + type, 
+                    data = training_set, method = "svmLinear",
                     trControl=trctrl,
                     preProcess = c("center", "scale"),
                     tuneLength = 10,
@@ -133,3 +135,4 @@ accuracy_lin #is the medium accuracy from 10 fold validation, repeated ten times
 precision_lin
 recall_lin
 f1_lin
+

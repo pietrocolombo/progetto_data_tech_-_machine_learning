@@ -13,7 +13,7 @@ if(!require(caret)){
 
 
 
-#training_set[["target"]] = factor(training_set[["target"]])
+#training_set$target <- as.factor(training_set$target)
 
 # Training phase
 
@@ -22,7 +22,7 @@ trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10)
 # x = training_set[, 1:11]
 # y = training_set[, 12]
 
-naive_bayes_model=train(target ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + type,
+naive_bayes_model=train(target ~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type,
                         data = training_set,
                         preProcess= c("center","scale"),
                         method = 'nb',
