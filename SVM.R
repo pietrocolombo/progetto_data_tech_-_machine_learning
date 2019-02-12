@@ -37,7 +37,7 @@ perc_csv <- "dataset_final.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 introduce(dati)
-plot_intro(dati)
+plot_intro(data_classification)
 plot_bar(dati)
 
 
@@ -52,15 +52,16 @@ anyNA(data_classification)
 
 
 # repeatedcv performs a balanced folds creation
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10) #10 fold cross validation 
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, returnResamp = "all") #10 fold cross validation 
 svm_Radial <- svm(target~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type , 
               data = training_set,
               kernel = "radial",
               method = "C-classification",
               preProcess = c("center","scale"), #scaling values for svm
               trControl=trctrl,
+              metric="Accuracy",
               cost = 10)
-
+trctrl
 
 # predict on test set with svm, radial kernel
 predict_radial <- predict(svm_Radial, test_set)

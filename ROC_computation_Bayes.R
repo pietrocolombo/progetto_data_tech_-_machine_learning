@@ -97,6 +97,7 @@ roc_obj_car <- roc(test_set$is_car, as.numeric(predict_car))
 print(auc(roc_obj_car))
 rs <- roc_obj_car[['rocs']]
 plot(ggroc(roc_obj_car, legacy.axes=TRUE) + geom_abline(slope=1, intercept=0, color="red", linetype=3) + theme_bw())
+x_mean <- c(auc(roc_obj_car), x_mean)
 
 par(new=TRUE)
 predict_bus <- predict(mod_bus, test_set)
@@ -104,6 +105,7 @@ roc_obj_bus <- roc(test_set$is_bus, as.numeric(predict_bus))
 print(auc(roc_obj_bus))
 rs <- roc_obj_bus[['rocs']]
 plot(ggroc(roc_obj_bus, legacy.axes=TRUE) + geom_abline(slope=1, intercept=0, color="red", linetype=3) + theme_bw())
+x_mean <- c(auc(roc_obj_bus), x_mean)
 
 par(new=TRUE)
 predict_train <- predict(mod_train, test_set)
@@ -111,6 +113,8 @@ roc_obj_train <- roc(test_set$is_train, as.numeric(predict_train))
 print(auc(roc_obj_train))
 rs <- roc_obj_train[['rocs']]
 plot(ggroc(roc_obj_train, legacy.axes=TRUE) + geom_abline(slope=1, intercept=0, color="red", linetype=3) + theme_bw())
+x_mean <- c(auc(roc_obj_train), x_mean)
+
 
 par(new=TRUE)
 predict_bike <- predict(mod_bike, test_set)
@@ -118,5 +122,7 @@ roc_obj_bike <- roc(test_set$is_bike, as.numeric(predict_bike))
 print(auc(roc_obj_bike))
 rs <- roc_obj_bike[['rocs']]
 plot(ggroc(roc_obj_bike, legacy.axes=TRUE) + geom_abline(slope=1, intercept=0, color="red", linetype=3) + theme_bw())
+x_mean <- c(auc(roc_obj_bike), x_mean)
 
 
+media <- mean(x_mean)
