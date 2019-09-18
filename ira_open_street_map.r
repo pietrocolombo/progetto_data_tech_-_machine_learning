@@ -72,6 +72,7 @@ for(i_row in 1:nrow(dati))
     callrosSnap <- paste0(callrosSnap, x, "\n", "y: ", y, "\n", "max_distance_radius: 50.0\"")
     
     # chiamo il servizio di ira_open_street_map che mi da le informazioni della way
+    # https://github.com/iralabdisco/ira_open_street_map
     info_way <- system(callrosSnap, intern = TRUE)
     
     highway[i] <- info_way[14]

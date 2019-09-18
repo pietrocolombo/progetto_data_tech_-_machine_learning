@@ -37,11 +37,24 @@ perc_csv <- "dataset_final.csv"
 dati <- read.csv(perc_csv, header = TRUE, sep =",", quote = "\"", dec = ".")
 
 introduce(dati)
-plot_intro(data_classification)
+plot_intro(dati)
 plot_bar(dati)
 
 
 
+
+# SPLIT DATASET INTO TEST (30%) AND TRAINING (70%)
+
+repeat{
+p <- 0.7
+sample <- sample.int(n = nrow(data_classification), size = floor(p * nrow(data_classification)), replace = FALSE)
+training_set <- data_classification[sample, ]
+label_training <- training_set$target
+test_set <- data_classification[-sample, ]
+label_test <- test_set$target
+if(length(levels(label_training)) == 5  &  length(levels(label_test)) == 5 )
+  break
+}
 
 training_set[["target"]] = factor(training_set[["target"]])
 # view dimension of training and test set
@@ -52,16 +65,15 @@ anyNA(data_classification)
 
 
 # repeatedcv performs a balanced folds creation
-trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10, returnResamp = "all") #10 fold cross validation 
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 10) #10 fold cross validation 
 svm_Radial <- svm(target~ vcr + sr + hcr + vel_max + vel_avg + altitude_max + altitude_avg + tot_duration + tot_distance + state_changed + city_changed + type , 
               data = training_set,
               kernel = "radial",
               method = "C-classification",
               preProcess = c("center","scale"), #scaling values for svm
               trControl=trctrl,
-              metric="Accuracy",
               cost = 10)
-trctrl
+
 
 # predict on test set with svm, radial kernel
 predict_radial <- predict(svm_Radial, test_set)
